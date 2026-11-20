@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Only window changes: "another app came to the front" and "the set of windows changed" (the second one is
+    what notices an app coming back from the recent apps list when the phone sends no event for the app itself).
+    No typing, no clicks, no text changes are requested; the windows are only asked which app owns them. canRetrieveWindowContent stays on because the planned in-app features (YouTube Shorts,
+    Instagram Reels) can only be recognised by looking at the structure of the screen; Pausa reads view ids,
+    never what is written in them.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowsChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_description"
+    android:notificationTimeout="100" />

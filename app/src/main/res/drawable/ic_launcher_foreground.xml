@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The shield with a double line and two pause bars (icon E8). Drawn on the 108 dp adaptive-icon canvas; the shield
+    spans 27 to 81, inside the 66 dp safe zone, so no launcher mask cuts it. The same shape is used as the themed
+    (monochrome) icon.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M54,24 L81,35 L81,54 C81,69 70,79 54,86 C38,79 27,69 27,54 L27,35 Z"
+        android:strokeColor="#B9A7FF"
+        android:strokeWidth="4"
+        android:strokeLineJoin="round" />
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.74"
+        android:scaleY="0.74">
+        <path
+            android:pathData="M54,24 L81,35 L81,54 C81,69 70,79 54,86 C38,79 27,69 27,54 L27,35 Z"
+            android:strokeColor="#B9A7FF"
+            android:strokeAlpha="0.5"
+            android:strokeWidth="4"
+            android:strokeLineJoin="round" />
+    </group>
+    <path
+        android:fillColor="#B9A7FF"
+        android:pathData="M46.5,48.5 A2.5,2.5 0 0 1 51.5,48.5 L51.5,60.5 A2.5,2.5 0 0 1 46.5,60.5 Z" />
+    <path
+        android:fillColor="#B9A7FF"
+        android:pathData="M56.5,48.5 A2.5,2.5 0 0 1 61.5,48.5 L61.5,60.5 A2.5,2.5 0 0 1 56.5,60.5 Z" />
+</vector>

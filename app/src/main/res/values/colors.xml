@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launcher icon is always lavender on black, whatever the theme of the phone. -->
+    <color name="ic_launcher_background">#000000</color>
+
+    <!-- What the window shows for a moment before the first frame is drawn: no flash of the wrong colour. -->
+    <color name="pausa_window_background">#FFFFFF</color>
+</resources>
