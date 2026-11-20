@@ -1,6 +1,11 @@
 package app.pausa.ui.apps
 
-import androidx.compose.foundation.layout.Box
+import app.pausa.ui.common.Switch
+import app.pausa.ui.common.FilledTonalButton
+import app.pausa.ui.common.NoticeDialog
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,22 +15,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pausa.ui.common.AppRow
 import app.pausa.ui.common.Dialog
 import app.pausa.ui.common.EmptyState
-import app.pausa.ui.common.ScreenTitle
 import app.pausa.ui.common.SkeletonRows
 import app.pausa.ui.common.Supporting
 import app.pausa.ui.common.rememberFriction
@@ -39,14 +44,32 @@ fun AppsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val friction = rememberFriction()
 
-    Box(Modifier.fillMaxSize()) {
-        Column(
+    Column(
+        Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp),
+    ) {
+        // The way to add an app sits next to the title, where it cannot cover a row (a floating button did, on its side).
+        Row(
             Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .padding(horizontal = 20.dp),
+                .fillMaxWidth()
+                .padding(top = 24.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            ScreenTitle("Apps")
+            Text(
+                "Apps",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f).semantics { heading() },
+            )
+            if (!state.loading && state.items.isNotEmpty()) {
+                FilledTonalButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                    Text("Añadir app")
+                }
+            }
+        }
+        run {
             when {
                 state.loading -> SkeletonRows()
                 state.items.isEmpty() -> EmptyState(
@@ -54,11 +77,10 @@ fun AppsScreen(
                     body = "Añade la app que más te distrae. Después eliges cuándo se bloquea y cuánto puedes usarla.",
                     actionLabel = "Añadir una app",
                     onAction = onAdd,
-                    modifier = Modifier.padding(bottom = 96.dp),
+                    modifier = Modifier.padding(bottom = 24.dp),
                 )
                 else -> LazyColumn(
-                    // Room at the bottom so the last row is never hidden behind the button.
-                    contentPadding = PaddingValues(bottom = 96.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp),
                 ) {
                     items(state.items, key = { it.ruleId }) { item ->
                         AppRow(
@@ -72,6 +94,7 @@ fun AppsScreen(
                             },
                             trailing = {
                                 Switch(
+                                    modifier = Modifier.semantics { contentDescription = "Controlar ${item.label}" },
                                     checked = item.enabled,
                                     enabled = !item.locked,
                                     onCheckedChange = { enabled ->
@@ -93,16 +116,8 @@ fun AppsScreen(
                 }
             }
         }
-        if (!state.loading && state.items.isNotEmpty()) {
-            ExtendedFloatingActionButton(
-                onClick = onAdd,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Añadir app", style = MaterialTheme.typography.labelLarge) },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp),
-            )
-        }
     }
+    val notice by viewModel.notice.collectAsStateWithLifecycle()
+    NoticeDialog(notice, viewModel::dismissNotice)
     friction.Dialog()
 }

@@ -1,5 +1,8 @@
 package app.pausa.ui.common
 
+import androidx.compose.foundation.background
+import app.pausa.ui.theme.LocalDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -76,8 +79,8 @@ fun AppIconRing(
 }
 
 /**
- * A small action drawn as an outlined pill. It replaces the stock chip, whose corners are squarer than the rest of
- * Noche. The touch target is 48 dp even though the pill is smaller.
+ * A small action drawn as a piece of glass (a capsule in Oscuro, a rounded rectangle in Claro). It replaces the stock
+ * chip, whose corners are squarer than the rest of the app. The touch target is 48 dp even though the pill is smaller.
  */
 @Composable
 fun PillChip(
@@ -85,13 +88,17 @@ fun PillChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    selected: Boolean = false,
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
+    val dark = LocalDarkTheme.current
+    val shape = if (dark) CircleShape else RoundedCornerShape(14.dp)
     Box(
         modifier
             .minimumInteractiveComponentSize()
-            .clip(CircleShape)
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = if (enabled) 0.7f else 0.3f), CircleShape)
+            .prismBorder(shape, width = 1.dp, alpha = if (selected) 0.95f else 0.6f, animated = false)
+            .glassSurface(shape, dark)
+            .then(if (selected) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)) else Modifier)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 18.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center,

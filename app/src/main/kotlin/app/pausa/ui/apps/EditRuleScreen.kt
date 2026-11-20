@@ -2,6 +2,10 @@
 
 package app.pausa.ui.apps
 
+import app.pausa.ui.common.AlertDialog
+import app.pausa.ui.common.Switch
+import app.pausa.ui.common.OutlinedButton
+import app.pausa.ui.common.NoticeDialog
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,12 +28,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -266,7 +267,7 @@ fun EditRuleScreen(
                         .fillMaxWidth()
                         .padding(vertical = 24.dp)
                         .heightIn(min = 48.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    contentColor = MaterialTheme.colorScheme.error,
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                     Text(if (isFeature) "Quitar esta regla" else "Dejar de controlar esta app")
@@ -332,6 +333,8 @@ fun EditRuleScreen(
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } },
         )
     }
+    val notice by viewModel.notice.collectAsStateWithLifecycle()
+    NoticeDialog(notice, viewModel::dismissNotice)
     friction.Dialog()
 }
 

@@ -1,5 +1,22 @@
 package app.pausa.ui.stats
 
+import kotlin.math.sqrt
+import app.pausa.ui.theme.LocalDarkTheme
+import app.pausa.ui.common.glassSurface
+import app.pausa.ui.common.GlassSphere
+import app.pausa.ui.common.AppIcon
+import app.pausa.domain.model.AppUsageStat
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import app.pausa.ui.theme.NumeralStyle
+import app.pausa.ui.common.Ring
+import androidx.compose.ui.unit.sp
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -89,16 +106,32 @@ fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
 private fun Streak(stats: StatsSnapshot) {
     Section(title = "Racha") {
         val days = stats.currentStreakDays
-        Text(
-            if (days == 0) "Empiezas hoy" else "$days ${if (days == 1) "día seguido" else "días seguidos"}",
-            style = MaterialTheme.typography.headlineSmall,
-        )
-        if (stats.bestStreakDays > days) {
-            Text(
-                "Tu mejor racha fue de ${stats.bestStreakDays} ${if (stats.bestStreakDays == 1) "día" else "días"}.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            // The ring fills toward the best streak (or a week, if there is none yet): how far along, at a glance.
+            val goal = maxOf(stats.bestStreakDays, 7)
+            GlassSphere(size = 112.dp, halo = false) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("$days", style = NumeralStyle.copy(fontSize = 40.sp, lineHeight = 44.sp))
+                    Text(
+                        if (days == 1) "día" else "días",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    if (days == 0) "Empiezas hoy" else "$days ${if (days == 1) "día seguido" else "días seguidos"}",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                if (stats.bestStreakDays > days) {
+                    Text(
+                        "Tu mejor racha fue de ${stats.bestStreakDays} ${if (stats.bestStreakDays == 1) "día" else "días"}.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
         Text(
             "Un día cuenta si no pediste un permiso temporal, no terminaste una concentración antes y no apagaste ninguna regla.",
@@ -119,10 +152,21 @@ private fun Week(stats: StatsSnapshot) {
             )
             return@Section
         }
-        Text(
-            "Evitaste ${stats.attemptsAvoided} ${if (stats.attemptsAvoided == 1) "apertura" else "aperturas"}.",
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        // The figure is the point of this section, so it is the largest thing in it; the sentence stays for screen readers.
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = "Evitaste ${stats.attemptsAvoided} ${if (stats.attemptsAvoided == 1) "apertura" else "aperturas"}"
+            },
+        ) {
+            Text("${stats.attemptsAvoided}", style = NumeralStyle.copy(fontSize = 56.sp, lineHeight = 60.sp))
+            Text(
+                if (stats.attemptsAvoided == 1) "apertura evitada" else "aperturas evitadas",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
         val parts = buildList {
             if (stats.blockedAttempts > 0) add("${stats.blockedAttempts} ${if (stats.blockedAttempts == 1) "bloqueo" else "bloqueos"}")
             if (stats.interventions > 0) add("${stats.interventions} ${if (stats.interventions == 1) "pausa" else "pausas"}")
@@ -152,46 +196,80 @@ private fun TopApps(stats: StatsSnapshot, labels: Map<String, String>) {
             return@Section
         }
         val top = stats.usageByApp.take(MAX_APPS)
-        val max = top.first().millis.coerceAtLeast(1)
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            top.forEach { app ->
-                val name = labels[app.packageName] ?: app.packageName
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.semantics { contentDescription = "$name: ${RuleText.duration(app.millis)}" },
-                ) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(name, style = MaterialTheme.typography.bodyLarge)
-                        Text(RuleText.duration(app.millis), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Bar(fraction = app.millis.toFloat() / max)
+        // Oscuro: capsule bars, one per app. Claro: glass spheres whose size is the share of time; touch one for its detail.
+        if (LocalDarkTheme.current) CapsuleBars(top, labels) else AppSpheres(top, labels)
+    }
+}
+
+@Composable
+private fun CapsuleBars(top: List<AppUsageStat>, labels: Map<String, String>) {
+    val max = top.first().millis.coerceAtLeast(1)
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        top.forEach { app ->
+            val name = labels[app.packageName] ?: app.packageName
+            val fraction = (app.millis.toFloat() / max).coerceIn(0.1f, 1f)
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .glassSurface(CircleShape, dark = true)
+                    .semantics { contentDescription = "$name: ${RuleText.duration(app.millis)}" },
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth(fraction)
+                        .fillMaxHeight()
+                        .padding(4.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), Color(0xFF7FD6F2).copy(alpha = 0.75f)))),
+                )
+                Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(name, style = MaterialTheme.typography.bodyLarge)
+                    Text(RuleText.duration(app.millis), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
     }
 }
 
-/** A thin horizontal bar: the share of the longest one. Decoration is kept to the one accent colour. */
 @Composable
-private fun Bar(fraction: Float) {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(6.dp)
-            .clip(RoundedCornerShape(3.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Box(
-            Modifier
-                .fillMaxWidth(fraction.coerceIn(0.03f, 1f))
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(3.dp))
-                .background(MaterialTheme.colorScheme.primary),
-        )
+private fun AppSpheres(top: List<AppUsageStat>, labels: Map<String, String>) {
+    var selected by remember { mutableIntStateOf(0) }
+    val max = top.first().millis.coerceAtLeast(1)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            top.forEachIndexed { index, app ->
+                val name = labels[app.packageName] ?: app.packageName
+                val size = (72 + 64 * sqrt(app.millis.toFloat() / max)).dp
+                GlassSphere(
+                    size = size,
+                    halo = false,
+                    animated = false,
+                    modifier = Modifier
+                        .then(if (index == selected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                        .clip(CircleShape)
+                        .clickable(role = Role.Button) { selected = index }
+                        .semantics { contentDescription = "$name: ${RuleText.duration(app.millis)}" },
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        AppIcon(app.packageName, Modifier.size(size * 0.34f))
+                        Text(RuleText.duration(app.millis), style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+            }
+        }
+        val chosen = top[selected.coerceIn(0, top.lastIndex)]
+        Row(
+            Modifier.fillMaxWidth().glassSurface(RoundedCornerShape(22.dp), dark = false).padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(labels[chosen.packageName] ?: chosen.packageName, style = MaterialTheme.typography.titleMedium)
+            Text(RuleText.duration(chosen.millis), style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }
 
-/** The hour with the most use is said in words; the chart that shows all of them is there only if asked for. */
 @Composable
 private fun Hours(stats: StatsSnapshot) {
     val peak = stats.peakHour ?: return

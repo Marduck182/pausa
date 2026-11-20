@@ -1,0 +1,176 @@
+<!-- Tema Oscuro: composiciones del B, fondo vivo dentro de cada pantalla y la cápsula como forma de casi todo.
+     Los marcadores data-appbg, data-dock y data-pillstage los rellena app.js. -->
+
+<section class="item" data-screen="Oscuro Inicio">
+  <div class="phone dk">
+    <div data-appbg></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><div class="brand"><svg class="i"><use href="#i-shield"/></svg>Pausa</div><span class="status-pill"><i class="dot"></i>Activa</span></div>
+      <div class="g-hero">
+        <h2 class="g-title">3 apps<br>bloqueadas</h2>
+        <p class="g-sub">Hoy usaste 0 min. Esta semana evitaste 95 aperturas.</p>
+      </div>
+      <div class="g-action">
+        <button class="glassbtn" type="button" data-glass="dark" data-bead="1" data-emblem="shield" id="gb-d-home" aria-label="Concentrarme">
+          <canvas aria-hidden="true"></canvas>
+          <span class="gb-label" style="flex-direction:column;gap:0;padding:0 24px 0 92px;line-height:1.2"><b>Concentrarme</b><small data-dur>30 min</small></span>
+        </button>
+        <div class="g-dial" role="group" aria-label="Duración">
+          <button class="g-chip" type="button" aria-pressed="false" data-v="15 min">15 min</button>
+          <button class="g-chip" type="button" aria-pressed="true" data-v="30 min">30 min</button>
+          <button class="g-chip" type="button" aria-pressed="false" data-v="1 h">1 h</button>
+          <button class="g-chip" type="button" aria-pressed="false" data-v="2 h">2 h</button>
+        </div>
+      </div>
+      <div class="g-strip">
+        <h4>En cuarentena</h4>
+        <div class="cap-pills">
+          <span class="cap-pill"><i class="appicon" style="background:oklch(0.68 0.19 45)">B</i>Brave</span>
+          <span class="cap-pill amber"><i class="appicon" style="background:linear-gradient(135deg,oklch(0.55 0.2 260),oklch(0.45 0.18 290))">CR</i>Clash Royale</span>
+          <span class="cap-pill"><i class="appicon" style="background:oklch(0.55 0.23 27)"><svg viewBox="0 0 24 24"><path d="M9 6l9 6-9 6z"/></svg></i>Shorts</span>
+        </div>
+      </div>
+    </div>
+    <nav class="dock" data-dock="0"></nav>
+  </div>
+  <div class="caption"><div><h2>Inicio</h2><p>La cápsula 3D es la acción; duraciones, estado y apps son cápsulas de cristal sobre el fondo vivo.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="Oscuro Apps">
+  <div class="phone dk">
+    <div data-appbg></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Apps</h3>
+        <button class="glassbtn sm" type="button" data-glass="dark" id="gb-d-add" aria-label="Añadir app"><canvas aria-hidden="true"></canvas><span class="gb-label">+ Añadir app</span></button>
+      </div>
+      <div class="cap-rows">
+        <div class="cap-row amber"><i class="appicon" style="background:linear-gradient(135deg,oklch(0.55 0.2 260),oklch(0.45 0.18 290))">CR</i><div><b>Clash Royale</b><small>Estricto, hasta las 18:00</small></div><svg class="i" style="color:var(--amber)"><use href="#i-lock"/></svg></div>
+        <div class="cap-row"><i class="appicon" style="background:oklch(0.68 0.19 45)">B</i><div><b>Brave</b><small>Siempre, pausa de 5 s</small></div><button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Brave" tabindex="0"></span></button></div>
+        <div class="cap-row"><i class="appicon" style="background:oklch(0.55 0.23 27)"><svg viewBox="0 0 24 24"><path d="M9 6l9 6-9 6z"/></svg></i><div><b>Shorts en YouTube</b><small>Siempre, te lleva a Inicio</small></div><button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Shorts" tabindex="0"></span></button></div>
+        <div class="cap-row"><i class="appicon" style="background:linear-gradient(135deg,oklch(0.6 0.22 340),oklch(0.62 0.2 25))">In</i><div><b>Instagram</b><small>30 min al día, usaste 12</small></div><button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Instagram" tabindex="0"></span></button></div>
+        <div class="cap-row"><i class="appicon" style="background:oklch(0.5 0.1 235)">X</i><div><b>X</b><small>Pausa de 15 s con respiración</small></div><button class="hit"><span class="switch" role="switch" aria-checked="false" aria-label="Controlar X" tabindex="0"></span></button></div>
+      </div>
+    </div>
+    <nav class="dock" data-dock="1"></nav>
+  </div>
+  <div class="caption"><div><h2>Apps</h2><p>Cada app es una cápsula larga con su icono redondo. Lo estricto va en ámbar con candado.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="Oscuro Enfoque">
+  <div class="phone dk">
+    <div data-appbg></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Enfoque</h3><span class="status-pill"><i class="dot"></i>En curso</span></div>
+      <div class="g-focus">
+        <div class="g-tube prism" role="img" aria-label="Queda el 58% del tiempo"><div class="fill"></div></div>
+        <div class="info">
+          <div><div class="g-time">24:15</div><p>Termina a las 10:45</p><p>Bloqueando 3 apps. Frenaste 12 intentos.</p></div>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:auto">
+        <button class="glassbtn g-hold" type="button" data-glass="dark" id="gb-d-end" aria-label="Terminar antes, mantén pulsado 3 segundos"><canvas aria-hidden="true"></canvas><span class="gb-label" style="flex-direction:column;gap:0;line-height:1.25"><b>Terminar antes</b><small>Mantén pulsado 3 s. Reinicia la racha.</small></span></button>
+        <button class="cap-btn" type="button">+ Extender 15 min</button>
+      </div>
+    </div>
+    <nav class="dock" data-dock="2"></nav>
+  </div>
+  <div class="caption"><div><h2>Enfoque</h2><p>El tiempo es un tubo de cristal que se vacía; terminar antes es una cápsula que se llena de luz al mantenerla.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="Oscuro Estadísticas">
+  <div class="phone dk">
+    <div data-appbg></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Estadísticas</h3></div>
+      <p class="g-lead">95 aperturas evitadas esta semana.</p>
+      <div class="g-bars">
+        <div class="g-bar" style="--w:100%;--h:50"><i></i><span>Brave</span><span>41</span></div>
+        <div class="g-bar" style="--w:78%;--h:265"><i></i><span>Clash Royale</span><span>32</span></div>
+        <div class="g-bar" style="--w:34%;--h:25"><i></i><span>Shorts</span><span>14</span></div>
+        <div class="g-bar" style="--w:20%;--h:340"><i></i><span>Instagram</span><span>8</span></div>
+      </div>
+      <div class="g-section"><h4>Por día</h4>
+        <div class="g-week" role="img" aria-label="Aperturas evitadas por día">
+          <div><i style="height:55%"></i>L</div><div><i style="height:70%"></i>M</div><div><i style="height:40%"></i>X</div><div><i style="height:85%"></i>J</div><div><i style="height:60%"></i>V</div><div><i style="height:30%"></i>S</div><div class="today"><i style="height:92%"></i>D</div>
+        </div>
+      </div>
+      <p class="g-sub" style="margin:0">5 días seguidos. Tu mejor racha fue de 9.</p>
+    </div>
+    <nav class="dock" data-dock="3"></nav>
+  </div>
+  <div class="caption"><div><h2>Estadísticas</h2><p>Una frase, barras y columnas con forma de cápsula teñidas con el color de cada app.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="Oscuro Bloqueo">
+  <div class="phone dk" id="gblock">
+    <div data-appbg></div>
+    <div data-pillstage></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="g-over">
+        <div class="g-lens prism"><div class="appicon" style="background:oklch(0.68 0.19 45)">B</div></div>
+        <h3>Brave está bloqueada</h3>
+        <p>La bloquea tu regla «Siempre». Puedes pedir un pase de 10 minutos.</p>
+      </div>
+      <div class="actions">
+        <button class="glassbtn" type="button" data-glass="dark" id="gb-leave" aria-label="Volver al inicio"><canvas aria-hidden="true"></canvas><span class="gb-label"><b>Volver al inicio</b></span></button>
+        <button class="cap-btn" type="button" data-pass disabled>Pedir pase de 10 min <small data-pass-wait>(en 5 s)</small></button>
+      </div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Bloqueo</h2><p>La app queda en una lente de cristal. «Volver al inicio» despide la pantalla con la cápsula que sube.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="Oscuro Pausa">
+  <div class="phone dk">
+    <div data-appbg></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="g-over">
+        <span class="cap-pill" style="padding:0 14px 0 6px"><i class="appicon" style="background:linear-gradient(135deg,oklch(0.6 0.22 340),oklch(0.62 0.2 25))">In</i>Instagram</span>
+        <h3>Un momento antes de abrirla</h3>
+        <div class="g-sphere prism" data-breath role="img" aria-label="Respira con la esfera"><div class="word"><strong data-word>Inhala</strong><span data-left>5 s</span></div></div>
+      </div>
+      <div class="actions">
+        <button class="glassbtn" type="button" data-glass="dark" data-go disabled id="gb-d-go" aria-label="Continuar"><canvas aria-hidden="true"></canvas><span class="gb-label"><b>Continuar</b><small data-go-wait>(en 5 s)</small></span></button>
+        <button class="cap-btn" type="button">Mejor no abrirla</button>
+      </div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Pausa</h2><p>Una esfera de cristal respira; «Continuar» se enciende cuando termina la espera.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="Oscuro Salida">
+  <div class="phone dk" id="gpill-phone">
+    <div data-appbg></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="g-over"><h3>Sales de la app</h3><p>Una cápsula de cristal sube desde el dock y se va.</p></div>
+    </div>
+    <div data-pillstage></div>
+    <nav class="dock" data-dock="0"></nav>
+  </div>
+  <div class="caption"><div><h2>Animación de salida</h2><p>Un orbe sube, se estira en cápsula con una flecha que brilla y se desvanece.</p></div><div style="display:grid;gap:8px"><button class="btn-small" type="button" data-replay>Repetir</button><button class="btn-small ask" type="button">Pedir cambio</button></div></div>
+</section>
+
+<section class="study dk" data-screen="Oscuro Estudio del botón">
+  <div data-appbg></div>
+  <div class="stage">
+    <button class="glassbtn" type="button" data-glass="dark" data-bead="1" data-emblem="spark" id="ms-d" aria-label="Pedir una pausa"><canvas aria-hidden="true"></canvas><span class="gb-label" style="padding:0 24px 0 120px"><b>Pedir una pausa</b></span></button>
+  </div>
+  <div>
+    <h2>Estudio de la cápsula</h2>
+    <p>Cristal que transmite el fondo vivo y separa la luz en colores. Mueve el puntero sobre la cápsula.</p>
+    <label>Dispersión del color <output data-out="disp">7</output></label>
+    <input type="range" min="0" max="20" step="1" value="7" data-ctl="ms-d" data-key="dispersion">
+    <label>Grosor del cristal <output data-out="thick">1.2</output></label>
+    <input type="range" min="0.2" max="3" step="0.1" value="1.2" data-ctl="ms-d" data-key="thickness">
+    <label>Inclinación con el puntero <output data-out="tilt">1</output></label>
+    <input type="range" min="0" max="2" step="0.1" value="1" data-ctl="ms-d" data-key="tilt">
+    <button class="btn-small ask" type="button" style="margin-top:18px">Pedir cambio</button>
+  </div>
+</section>

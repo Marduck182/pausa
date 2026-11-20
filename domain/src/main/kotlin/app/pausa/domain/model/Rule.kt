@@ -11,6 +11,12 @@ data class Rule(
     val enabled: Boolean = true,
     /** While a hard-mode rule is blocking, it cannot be edited, disabled or temporarily allowed. */
     val hardMode: Boolean = false,
+    /**
+     * True when the stored row could not be read. It is kept as an "always block" rule instead of being dropped:
+     * losing a rule silently would let the app through, and blocking by mistake is the safe and visible failure.
+     * The person can open it, see the warning and set it up again.
+     */
+    val unreadable: Boolean = false,
 )
 
 sealed interface Restriction {

@@ -1,5 +1,6 @@
 package app.pausa.ui.apps
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,7 @@ import app.pausa.domain.repository.SettingsRepository
 import app.pausa.domain.repository.StatsRepository
 import app.pausa.domain.repository.UsageRepository
 import app.pausa.domain.usecase.RuleLock
+import app.pausa.domain.usecase.RuleLockChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.DayOfWeek
@@ -28,6 +30,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,8 +68,18 @@ class EditRuleViewModel @Inject constructor(
     private val usageRepository: UsageRepository,
     private val settings: SettingsRepository,
     private val stats: StatsRepository,
+    private val locks: RuleLockChecker,
     private val clock: Clock,
 ) : ViewModel() {
+
+    private val _notice = MutableStateFlow<String?>(null)
+
+    /** Why the last action was not done, or null. Shown in a dialog until the person dismisses it. */
+    val notice: StateFlow<String?> = _notice.asStateFlow()
+
+    fun dismissNotice() {
+        _notice.value = null
+    }
 
     private val ruleId: Long = checkNotNull(savedStateHandle["ruleId"])
 
@@ -190,9 +203,12 @@ class EditRuleViewModel @Inject constructor(
         val draft = s.draft ?: return
         if (!draft.isValid || s.locked) return
         viewModelScope.launch {
-            rules.upsert(draft.toRule())
-            if (s.original?.enabled == true && !draft.enabled) recordGivingIn(draft.packageName, InterventionOutcome.RULE_DISABLED)
-            _state.update { it.copy(dirty = false, finished = true) }
+            if (stoppedByLock()) return@launch
+            guarded {
+                rules.upsert(draft.toRule())
+                if (s.original?.enabled == true && !draft.enabled) recordGivingIn(draft.packageName, InterventionOutcome.RULE_DISABLED)
+                _state.update { it.copy(dirty = false, finished = true) }
+            }
         }
     }
 
@@ -200,9 +216,12 @@ class EditRuleViewModel @Inject constructor(
         val s = _state.value
         if (s.locked) return
         viewModelScope.launch {
-            rules.delete(ruleId)
-            s.draft?.let { recordGivingIn(it.packageName, InterventionOutcome.RULE_DISABLED) }
-            _state.update { it.copy(dirty = false, finished = true) }
+            if (stoppedByLock()) return@launch
+            guarded {
+                rules.delete(ruleId)
+                s.draft?.let { recordGivingIn(it.packageName, InterventionOutcome.RULE_DISABLED) }
+                _state.update { it.copy(dirty = false, finished = true) }
+            }
         }
     }
 
@@ -212,9 +231,35 @@ class EditRuleViewModel @Inject constructor(
         val draft = s.draft ?: return
         if (s.locked || !s.blockingNow) return
         viewModelScope.launch {
-            settings.addTemporaryAllow(TemporaryAllow(draft.packageName, clock.instant().plus(TEMPORARY_ALLOW)))
-            recordGivingIn(draft.packageName, InterventionOutcome.TEMP_ALLOW)
-            _state.update { it.copy(dirty = false, finished = true) }
+            if (stoppedByLock()) return@launch
+            guarded {
+                settings.addTemporaryAllow(TemporaryAllow(draft.packageName, clock.instant().plus(TEMPORARY_ALLOW)))
+                recordGivingIn(draft.packageName, InterventionOutcome.TEMP_ALLOW)
+                _state.update { it.copy(dirty = false, finished = true) }
+            }
+        }
+    }
+
+    /**
+     * The screen may have been open for a while: asks again, from what is stored now, whether hard mode started
+     * blocking since it was drawn. If so nothing is changed and the screen switches to its locked state.
+     */
+    private suspend fun stoppedByLock(): Boolean {
+        if (!locks.isRuleLocked(ruleId)) return false
+        _state.update { it.copy(locked = true) }
+        _notice.value = RuleMessages.LOCKED
+        return true
+    }
+
+    /** A failed write is told to the person; the screen stays open with what they had entered. */
+    private suspend fun guarded(block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e("PausaEditor", "Could not save rule $ruleId", e)
+            _notice.value = RuleMessages.SAVE_FAILED
         }
     }
 

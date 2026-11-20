@@ -1,5 +1,12 @@
 package app.pausa.ui.settings
 
+import app.pausa.ui.common.AlertDialog
+import app.pausa.domain.model.BlockExit
+import app.pausa.ui.common.OutlinedButton
+import app.pausa.ui.common.Button
+import app.pausa.ui.common.PillChip
+import app.pausa.domain.model.ThemeMode
+import app.pausa.ui.common.NoticeDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,11 +18,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -81,12 +84,28 @@ fun SettingsScreen(
     ) {
         ScreenTitle("Ajustes")
 
+        Section(title = "Apariencia") {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                listOf(ThemeMode.SYSTEM to "Sistema", ThemeMode.LIGHT to "Claro", ThemeMode.DARK to "Oscuro").forEach { (mode, label) ->
+                    PillChip(text = label, onClick = { viewModel.setThemeMode(mode) }, selected = settings.themeMode == mode)
+                }
+            }
+        }
+
         Section(
-            title = "Protección contra impulsos",
-            description = "Un poco de fricción cuando vayas a apagar algo de lo que tú mismo configuraste.",
+            title = "Al bloquear una app",
+            description = if (settings.blockExit == BlockExit.BACK) "Si volver atrás no la cierra, te lleva al inicio." else null,
         ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                listOf(BlockExit.HOME to "Ir al inicio", BlockExit.BACK to "Volver atrás").forEach { (exit, label) ->
+                    PillChip(text = label, onClick = { viewModel.setBlockExit(exit) }, selected = settings.blockExit == exit)
+                }
+            }
+        }
+
+        Section(title = "Protección") {
             Text(
-                if (settings.pinEnabled) "PIN activado." else "Sin PIN. Con un PIN, apagar reglas o pedir permisos también lo pide.",
+                if (settings.pinEnabled) "PIN activado." else "Sin PIN.",
                 style = MaterialTheme.typography.bodyMedium,
             )
             if (!settings.pinEnabled) {
@@ -115,7 +134,7 @@ fun SettingsScreen(
                 ) { Text("Quitar PIN") }
             }
             Stepper(
-                label = "Espera antes de acciones delicadas",
+                label = "Espera al apagar reglas",
                 value = settings.cooldownSeconds,
                 onValueChange = { seconds ->
                     if (seconds < settings.cooldownSeconds) {
@@ -134,12 +153,9 @@ fun SettingsScreen(
             )
         }
 
-        Section(
-            title = "Patrón de seguridad",
-            description = "Para pedir un patrón antes de abrir una app. Lo activas app por app, en su regla.",
-        ) {
+        Section(title = "Patrón de seguridad") {
             Text(
-                if (settings.patternEnabled) "Patrón activado." else "Sin patrón.",
+                if (settings.patternEnabled) "Patrón activado. Se pide en las apps que lo tengan en su regla." else "Sin patrón.",
                 style = MaterialTheme.typography.bodyMedium,
             )
             if (!settings.patternEnabled) {
@@ -156,7 +172,7 @@ fun SettingsScreen(
 
         Section(
             title = "Excepciones",
-            description = "Apps que siempre pasan, aunque haya un bloqueo o una concentración: mensajes, mapas, correo…",
+            description = "Apps que siempre pasan.",
         ) {
             Row(
                 Modifier
@@ -176,23 +192,34 @@ fun SettingsScreen(
 
         Section(
             title = "Permisos",
-            description = if (serviceEnabled) "El servicio de accesibilidad está activo." else "El servicio de accesibilidad está apagado: Pausa no bloquea nada.",
+            description = if (serviceEnabled) "Accesibilidad activa." else "Accesibilidad apagada: no se bloquea nada.",
         ) {
-            PermissionGuide()
-            ActivationHelp()
+            // The long explanation is folded away; with the service off it is what the person needs, so it opens by itself.
+            var expanded by remember(serviceEnabled) { mutableStateOf(!serviceEnabled) }
+            Row(
+                Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Qué pide Pausa y por qué", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text(if (expanded) "Ocultar" else "Ver", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
+            }
+            if (expanded) {
+                PermissionGuide()
+                ActivationHelp()
+            }
         }
 
-        Section(title = "Privacidad", description = "Lo que Pausa guarda en este teléfono y nada más.") {
+        Section(title = "Privacidad") {
             Text(
-                "Tus reglas, el tiempo de uso de las apps que controlas (30 días), las veces que te frenó y tus ajustes. " +
-                    "No hay cuenta, ni internet, ni copia en la nube: Android no la hace con esta app.",
+                "Todo se queda en este teléfono: tus reglas, el uso de las apps que controlas (30 días) y tus ajustes. " +
+                    "Sin cuenta ni internet.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             OutlinedButton(
                 onClick = { confirmErase = true },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                contentColor = MaterialTheme.colorScheme.error,
             ) { Text("Borrar todos mis datos") }
         }
 
@@ -256,6 +283,8 @@ fun SettingsScreen(
             dismissButton = { TextButton(onClick = { confirmErase = false }) { Text("Cancelar") } },
         )
     }
+    val notice by viewModel.notice.collectAsStateWithLifecycle()
+    NoticeDialog(notice, viewModel::dismissNotice)
     friction.Dialog()
 }
 

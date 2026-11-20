@@ -1,5 +1,7 @@
 package app.pausa.ui.dashboard
 
+import java.time.Instant
+import app.pausa.domain.model.TemporaryAllow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pausa.domain.model.FocusSession
@@ -48,6 +50,8 @@ data class DashboardUiState(
     /** Time left today across apps that have a daily limit, or null if none has one. */
     val availableMillis: Long? = null,
     val stats: StatsSnapshot? = null,
+    /** When the current break ends, or null. A break is a temporary pass on every app that has an active rule. */
+    val breakUntil: Instant? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -112,7 +116,47 @@ class DashboardViewModel @Inject constructor(
         )
     }.combine(labels) { state, labels -> state.copy(labels = labels) }
         .combine(stats) { state, stats -> state.copy(stats = stats) }
+        .combine(breakUntilFlow()) { state, until -> state.copy(breakUntil = until) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
+
+    /**
+     * A break is active while every app that has an active rule also has a temporary pass. The latest end among the
+     * shortest passes is what the screen shows. A single-app pass given from a block screen does not count as a break.
+     */
+    private fun breakUntilFlow(): Flow<Instant?> = combine(
+        ruleRepository.observeRules(),
+        settingsRepository.temporaryAllows,
+        ticker,
+    ) { rules, allows, _ ->
+        val packages = rules.filter { it.enabled }.map { it.target.packageName }.toSet()
+        val now = clock.instant()
+        if (packages.isEmpty()) return@combine null
+        val ends = packages.map { pkg -> allows.filter { it.packageName == pkg && it.until > now }.maxOfOrNull { it.until } }
+        if (ends.any { it == null }) null else ends.filterNotNull().min()
+    }.distinctUntilChanged()
+
+    /**
+     * Starts a break: every app with an active rule can be opened without waiting for [minutes]. The engine already
+     * treats a temporary pass this way, so strict rules and a focus session stay in force. It is recorded like any
+     * other pass (it affects the streak), once, not once per app.
+     */
+    fun startBreak(minutes: Int) {
+        viewModelScope.launch {
+            val packages = ruleRepository.getRules().filter { it.enabled }.map { it.target.packageName }.toSet()
+            if (packages.isEmpty()) return@launch
+            val now = clock.instant()
+            val until = now.plus(Duration.ofMinutes(minutes.toLong()))
+            packages.forEach { settingsRepository.addTemporaryAllow(TemporaryAllow(it, until)) }
+            statsRepository.record(
+                InterventionEvent(now, packages.first(), InterventionOutcome.TEMP_ALLOW),
+                now.atZone(clock.zone).toLocalDate().toEpochDay(),
+            )
+        }
+    }
+
+    fun endBreak() {
+        viewModelScope.launch { settingsRepository.clearTemporaryAllows() }
+    }
 
     /** Starts a focus session on every app and feature that has an active rule. */
     fun startFocus(minutes: Int) {

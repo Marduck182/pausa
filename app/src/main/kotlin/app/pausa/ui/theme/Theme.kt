@@ -1,11 +1,19 @@
 package app.pausa.ui.theme
 
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import app.pausa.domain.model.ThemeMode
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -16,25 +24,49 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pausa.R
 
+/** True while the dark look is in use. Components that draw their own glass read it to pick their material. */
+val LocalDarkTheme = staticCompositionLocalOf { true }
+
 /**
- * Noche: black and one lavender accent in dark mode (white and a deeper violet in light mode, following the
- * phone). It is the brand's own palette, not the wallpaper's, so dynamic colour is left out on purpose.
+ * Oscuro (glass capsules over a living background) or Claro (a silvery studio with multicolour spheres), following the
+ * phone unless the person chose one. It is the brand's own palette, not the wallpaper's, so dynamic colour is left out
+ * on purpose.
  */
 @Composable
 fun PausaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        typography = PausaTypography,
-        shapes = PausaShapes,
-        content = content,
-    )
+    val darkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+    // The system bars follow the chosen look, not the phone's: light icons on a dark screen and the reverse.
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            val controller = WindowCompat.getInsetsController(window, view)
+            controller.isAppearanceLightStatusBars = !darkTheme
+            controller.isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
+    val colors = if (darkTheme) DarkColors else LightColors
+    // Nothing here sits on a Surface (the screens are transparent over the backdrop), so the default text colour has to
+    // come from the theme: without this, text is black on the dark look.
+    CompositionLocalProvider(LocalDarkTheme provides darkTheme, LocalContentColor provides colors.onBackground) {
+        MaterialTheme(
+            colorScheme = colors,
+            typography = PausaTypography,
+            shapes = PausaShapes,
+            content = content,
+        )
+    }
 }
 
 /**
- * Nothing in Noche has a corner you could cut yourself on. The standard components (chips, text fields, dialogs,
+ * Nothing in Pausa has a corner you could cut yourself on. The standard components (chips, text fields, dialogs,
  * menus) take their corners from here, so none of them falls back to a squarer default.
  */
 private val PausaShapes = Shapes(

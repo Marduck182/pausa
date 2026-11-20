@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pausa, propuesta de diseño</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="glass.css">
+<link rel="stylesheet" href="blueprint.css">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body data-design="a">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-apps" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></symbol>
+  <symbol id="i-focus" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 3h6"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-6"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M12 7l3.5 1.5v3c0 2.6-1.5 4.3-3.5 5.4-2-1.1-3.5-2.8-3.5-5.4v-3z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="currentColor"/></symbol>
+</svg>
+
+<div id="d-bg" hidden aria-hidden="true"></div>
+
+<header class="top">
+  <h1>Pausa, propuesta de diseño</h1>
+  <p id="design-note">Las pantallas se pueden tocar. Usa «Pedir cambio» en cualquiera y yo leo tus notas.</p>
+  <div class="design-switch" role="group" aria-label="Diseño"><button type="button" data-d="a" aria-pressed="true">A · Noche</button><button type="button" data-d="b" aria-pressed="false">B · Cristal</button><button type="button" data-d="c" aria-pressed="false">C · Estudio</button><button type="button" data-d="c2" aria-pressed="false">C2 · Estudio v2</button><button type="button" data-d="d" aria-pressed="false">D · Índice</button></div>
+  <button class="btn-small" id="open-panel" type="button">Mis cambios <span id="count">(0)</span></button>
+</header>
+
+<main class="gallery" id="gallery-a">
+
+<!-- 1. Inicio -->
+<section class="item" data-screen="Inicio">
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar">
+        <div class="brand"><svg class="i"><use href="#i-shield"/></svg>Pausa</div>
+        <span class="status-pill"><i class="dot"></i>Activa</span>
+      </div>
+
+      <div class="orb-wrap" role="img" aria-label="Tres apps bloqueadas ahora">
+        <svg class="ringsvg" viewBox="0 0 240 240" aria-hidden="true">
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="oklch(0.80 0.11 295)"/><stop offset="1" stop-color="oklch(0.86 0.10 205)"/></linearGradient></defs>
+          <circle cx="120" cy="120" r="112" fill="none" stroke="oklch(1 0 0 / 0.07)" stroke-width="4"/>
+          <circle cx="120" cy="120" r="112" fill="none" stroke="url(#g1)" stroke-width="4" stroke-linecap="round" stroke-dasharray="704" stroke-dashoffset="0"/>
+        </svg>
+        <div class="orb"></div>
+        <div class="orb-text"><strong>Ahora</strong><span>3 apps bloqueadas</span></div>
+      </div>
+
+      <p class="fact">Hoy usaste 0 min. Esta semana evitaste 95 aperturas.</p>
+
+      <div class="card-focus">
+        <div><h4>Concentrarme ahora</h4><p>Bloquea todo lo que controlas hasta que pase el tiempo.</p></div>
+        <div class="chips" data-chips="focus">
+          <button class="chip" type="button" aria-pressed="false" data-v="15 min">15 min</button>
+          <button class="chip" type="button" aria-pressed="true" data-v="30 min">30 min</button>
+          <button class="chip" type="button" aria-pressed="false" data-v="1 h">1 h</button>
+          <button class="chip" type="button" aria-pressed="false" data-v="2 h">2 h</button>
+        </div>
+        <button class="btn btn-primary" type="button" id="start-focus"><svg class="i"><use href="#i-play"/></svg><span>Empezar 30 min</span></button>
+      </div>
+
+      <div class="group">
+        <h4>Bloqueadas ahora</h4>
+        <div class="row"><div class="appicon" style="background:oklch(0.68 0.19 45)">B</div><div><div class="name">Brave</div></div><span class="badge">Siempre</span></div>
+        <div class="row"><div class="appicon" style="background:linear-gradient(135deg,oklch(0.55 0.2 260),oklch(0.45 0.18 290))">CR</div><div><div class="name">Clash Royale</div></div><span class="badge amber">Estricto hasta las 18:00</span></div>
+        <div class="row"><div class="appicon" style="background:oklch(0.55 0.23 27)"><svg viewBox="0 0 24 24"><path d="M9 6l9 6-9 6z"/></svg></div><div><div class="name">Shorts en YouTube</div></div><span class="badge">Siempre</span></div>
+      </div>
+    </div>
+    <nav class="dock" aria-label="Principal">
+      <button class="tab" aria-current="page"><svg class="i"><use href="#i-home"/></svg>Inicio</button>
+      <button class="tab"><svg class="i"><use href="#i-apps"/></svg>Apps</button>
+      <button class="tab"><svg class="i"><use href="#i-focus"/></svg>Enfoque</button>
+      <button class="tab"><svg class="i"><use href="#i-chart"/></svg>Estadísticas</button>
+    </nav>
+  </div>
+  <div class="caption"><div><h2>Inicio</h2><p>Una pregunta: qué pasa ahora. El orbe es el estado; lo demás espera abajo.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<!-- 2. Apps -->
+<section class="item" data-screen="Apps">
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar">
+        <h3>Apps</h3>
+        <button class="btn-small" type="button" style="min-height:48px"><svg class="i" style="width:18px;height:18px;vertical-align:-3px;margin-right:6px"><use href="#i-plus"/></svg>Añadir app</button>
+      </div>
+
+      <div class="block locked">
+        <div class="row" style="padding:0;box-shadow:none">
+          <div class="appicon" style="background:linear-gradient(135deg,oklch(0.55 0.2 260),oklch(0.45 0.18 290))">CR</div>
+          <div><div class="name">Clash Royale <span class="badge amber">Estricto</span></div><div class="sub">Bloqueada hasta las 18:00</div></div>
+          <svg class="i" style="color:var(--amber)"><use href="#i-lock"/></svg>
+        </div>
+        <div class="sub" style="color:oklch(0.82 0.06 75)">No se puede cambiar hasta entonces. Después vuelve a ser editable.</div>
+      </div>
+
+      <div class="group">
+        <div class="row">
+          <div class="appicon" style="background:oklch(0.68 0.19 45)">B</div>
+          <div><div class="name">Brave</div><div class="sub">Siempre bloqueada · pausa de 5 s</div></div>
+          <button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Brave" tabindex="0"></span></button>
+        </div>
+        <div class="row">
+          <div class="appicon" style="background:oklch(0.55 0.23 27)"><svg viewBox="0 0 24 24"><path d="M9 6l9 6-9 6z"/></svg></div>
+          <div><div class="name">Shorts en YouTube</div><div class="sub">Siempre bloqueada · te lleva a Inicio</div></div>
+          <button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Shorts" tabindex="0"></span></button>
+        </div>
+        <div class="row" style="grid-template-columns:48px 1fr auto;align-items:start">
+          <div class="appicon" style="background:linear-gradient(135deg,oklch(0.6 0.22 340),oklch(0.62 0.2 25))">In</div>
+          <div>
+            <div class="name">Instagram</div>
+            <div class="sub">Límite de 30 min al día</div>
+            <div class="meter" style="margin-top:10px"><i style="width:40%"></i></div>
+            <div class="sub" style="margin-top:6px">Hoy: 12 de 30 min</div>
+          </div>
+          <button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Instagram" tabindex="0"></span></button>
+        </div>
+        <div class="row">
+          <div class="appicon" style="background:oklch(0.5 0.1 235)">X</div>
+          <div><div class="name">X</div><div class="sub">Pausa de 15 s con respiración</div></div>
+          <button class="hit"><span class="switch" role="switch" aria-checked="false" aria-label="Controlar X" tabindex="0"></span></button>
+        </div>
+      </div>
+    </div>
+    <nav class="dock" aria-label="Principal">
+      <button class="tab"><svg class="i"><use href="#i-home"/></svg>Inicio</button>
+      <button class="tab" aria-current="page"><svg class="i"><use href="#i-apps"/></svg>Apps</button>
+      <button class="tab"><svg class="i"><use href="#i-focus"/></svg>Enfoque</button>
+      <button class="tab"><svg class="i"><use href="#i-chart"/></svg>Estadísticas</button>
+    </nav>
+  </div>
+  <div class="caption"><div><h2>Apps</h2><p>Lista simple, sin tarjetas por app. Lo estricto va en ámbar con candado y su hora.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<!-- 3. Concentración -->
+<section class="item" data-screen="Concentración">
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Enfoque</h3><span class="status-pill"><i class="dot"></i>En curso</span></div>
+      <div class="session-ring" role="img" aria-label="Quedan 24 minutos 15 segundos">
+        <svg viewBox="0 0 280 280" aria-hidden="true">
+          <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="oklch(0.80 0.11 295)"/><stop offset="1" stop-color="oklch(0.86 0.10 205)"/></linearGradient></defs>
+          <circle cx="140" cy="140" r="130" fill="none" stroke="oklch(1 0 0 / 0.07)" stroke-width="5"/>
+          <circle cx="140" cy="140" r="130" fill="none" stroke="url(#g2)" stroke-width="5" stroke-linecap="round" stroke-dasharray="817" stroke-dashoffset="330"/>
+        </svg>
+        <div class="orb"></div>
+        <div class="orb-text"><span>Quedan</span><span class="big-time">24:15</span><span>Termina a las 10:45</span></div>
+      </div>
+      <p class="fact">Bloqueando 3 apps. Frenaste 12 intentos.</p>
+      <div class="actions" style="margin-top:auto">
+        <button class="btn hold" type="button" id="hold-end"><span>Terminar antes<small class="hint">Mantén pulsado 3 s. Reinicia la racha de días.</small></span></button>
+        <button class="btn btn-ghost" type="button"><svg class="i"><use href="#i-plus"/></svg>Extender 15 min</button>
+      </div>
+    </div>
+    <nav class="dock" aria-label="Principal">
+      <button class="tab"><svg class="i"><use href="#i-home"/></svg>Inicio</button>
+      <button class="tab"><svg class="i"><use href="#i-apps"/></svg>Apps</button>
+      <button class="tab" aria-current="page"><svg class="i"><use href="#i-focus"/></svg>Enfoque</button>
+      <button class="tab"><svg class="i"><use href="#i-chart"/></svg>Estadísticas</button>
+    </nav>
+  </div>
+  <div class="caption"><div><h2>Concentración en curso</h2><p>Terminar antes cuesta: hay que mantener pulsado. Extender es un toque.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<!-- 4. Estadísticas por app -->
+<section class="item" data-screen="Estadísticas por app">
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Estadísticas</h3></div>
+      <div class="segmented" role="group" aria-label="Periodo">
+        <button type="button" aria-pressed="true">Semana</button>
+        <button type="button" aria-pressed="false">Mes</button>
+        <button type="button" aria-pressed="false">Total</button>
+      </div>
+
+      <div class="dotring" id="dotring" role="img" aria-label="Aperturas evitadas esta semana por app">
+        <svg viewBox="0 0 250 250" aria-hidden="true"></svg>
+        <div class="center"><strong>95</strong><span>aperturas evitadas</span></div>
+      </div>
+
+      <div class="rail" id="rail" aria-label="Apps, desliza para cambiar"></div>
+      <div class="pager" id="pager" aria-hidden="true"></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+
+      <div class="group">
+        <h4>Racha</h4>
+        <p class="fact" style="text-align:left">5 días seguidos. Tu mejor racha fue de 9.</p>
+      </div>
+      <div class="week" role="img" aria-label="Aperturas evitadas por día, la última semana">
+        <div style="--h:55%"><i style="height:55%"></i>L</div><div><i style="height:70%"></i>M</div><div><i style="height:40%"></i>X</div>
+        <div><i style="height:85%"></i>J</div><div><i style="height:60%"></i>V</div><div><i style="height:30%"></i>S</div><div class="today"><i style="height:92%"></i>D</div>
+      </div>
+      <p class="fact" style="font-size:.875rem;color:var(--ink-3)">Todo se calcula en este teléfono, solo con el nombre de la app y la hora.</p>
+    </div>
+    <nav class="dock" aria-label="Principal">
+      <button class="tab"><svg class="i"><use href="#i-home"/></svg>Inicio</button>
+      <button class="tab"><svg class="i"><use href="#i-apps"/></svg>Apps</button>
+      <button class="tab"><svg class="i"><use href="#i-focus"/></svg>Enfoque</button>
+      <button class="tab" aria-current="page"><svg class="i"><use href="#i-chart"/></svg>Estadísticas</button>
+    </nav>
+  </div>
+  <div class="caption"><div><h2>Estadísticas por app</h2><p>Desliza las tarjetas: el anillo de puntos resalta la parte de esa app.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<!-- 5. Bloqueo -->
+<section class="item" data-screen="Bloqueo">
+  <div class="phone over" id="block-phone">
+    <div class="orb-light" aria-hidden="true"></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen centered">
+      <div class="stack">
+        <div class="ringicon"><div class="appicon" style="background:oklch(0.68 0.19 45)">B</div></div>
+        <h3>Brave está bloqueada</h3>
+        <p>La bloquea tu regla «Siempre». Puedes pedir un pase de 10 minutos.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" id="leave-btn">Volver al inicio</button>
+        <button class="btn btn-ghost" type="button" id="pass-btn" disabled>Pedir pase de 10 min <small id="pass-wait">(en 5 s)</small></button>
+      </div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Bloqueo</h2><p>El icono de la app dentro del anillo. Con la variante clara, el orbe de Stitch.</p></div><div style="display:grid;gap:8px"><button class="btn-small" type="button" id="theme-block">Ver variante clara</button><button class="btn-small ask" type="button">Pedir cambio</button></div></div>
+</section>
+
+<!-- 6. Pausa -->
+<section class="item" data-screen="Pausa">
+  <div class="phone over">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen centered">
+      <div class="stack">
+        <div class="ringicon" style="width:72px;height:72px"><div class="appicon" style="width:40px;height:40px;border-radius:12px;font-size:.875rem;background:linear-gradient(135deg,oklch(0.6 0.22 340),oklch(0.62 0.2 25))">In</div></div>
+        <h3>Un momento antes de abrir Instagram</h3>
+        <div class="breath" role="img" aria-label="Respira con el círculo">
+          <svg viewBox="0 0 220 220" aria-hidden="true"><circle cx="110" cy="110" r="104" fill="none" stroke="oklch(1 0 0 / 0.07)" stroke-width="3"/><circle id="pause-arc" cx="110" cy="110" r="104" fill="none" stroke="oklch(0.80 0.11 295)" stroke-width="3" stroke-linecap="round" stroke-dasharray="653" stroke-dashoffset="0"/></svg>
+          <div class="orb" id="breath-orb"></div>
+          <div class="word"><strong id="breath-word">Inhala</strong><span id="pause-left">5 s</span></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" id="pause-go" disabled>Continuar <small id="pause-wait">(en 5 s)</small></button>
+        <button class="btn btn-ghost" type="button">Mejor no abrirla</button>
+      </div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Pausa</h2><p>El orbe respira y la cuenta atrás se vacía. Salir siempre está a un toque.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<!-- 7. Patrón -->
+<section class="item" data-screen="Patrón">
+  <div class="phone over">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen centered">
+      <div class="stack">
+        <div class="ringicon" style="width:72px;height:72px"><div class="appicon" style="width:40px;height:40px;border-radius:12px;font-size:.875rem;background:linear-gradient(135deg,oklch(0.55 0.2 260),oklch(0.45 0.18 290))">CR</div></div>
+        <h3>Dibuja tu patrón para abrir Clash Royale</h3>
+        <svg class="pad" id="pad" viewBox="0 0 240 240" aria-label="Zona para dibujar el patrón con el dedo"></svg>
+        <p id="pad-msg">Une al menos 4 puntos.</p>
+      </div>
+      <div class="actions"><button class="btn btn-ghost" type="button">Volver al inicio</button></div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Patrón</h2><p>Se dibuja con el dedo. Prueba a unir puntos.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<!-- 8. Bienvenida -->
+<section class="item" data-screen="Bienvenida">
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen welcome centered">
+      <div class="welcome-bar"><span></span><strong>PAUSA</strong><span>1 / 3</span></div>
+      <div class="shield-hero"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield"/></svg></div>
+      <h3>Un momento antes de abrir esa app.</h3>
+      <p>Tú eliges qué apps controlar, en qué horarios y cuánto tiempo. Pausa te frena con una pausa o las bloquea.</p>
+      <ul>
+        <li><svg class="i"><use href="#i-check"/></svg>Todo ocurre en este teléfono.</li>
+        <li><svg class="i"><use href="#i-check"/></svg>No necesita cuenta.</li>
+        <li><svg class="i"><use href="#i-check"/></svg>No tiene permiso de internet.</li>
+      </ul>
+      <div class="forward" style="margin-top:auto"><button type="button">Comenzar<span class="go"><svg class="i" style="width:28px;height:28px"><use href="#i-arrow"/></svg></span></button></div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Bienvenida</h2><p>La acción siempre abajo a la derecha, bajo el pulgar.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+</main>
+<main class="gallery" id="gallery-b" hidden></main>
+<main class="gallery" id="gallery-c" hidden></main>
+<main class="gallery" id="gallery-c2" hidden></main>
+<main id="gallery-d" hidden></main>
+
+<aside class="panel" id="panel" aria-label="Pedir cambios" aria-hidden="true">
+  <h2>Pedir un cambio</h2>
+  <div><label for="note-screen">Pantalla</label><select id="note-screen"></select></div>
+  <div><label for="note-text">Qué cambiarías</label><textarea id="note-text" placeholder="Por ejemplo: el anillo más pequeño, otro color de acento, quitar la racha de esta pantalla."></textarea></div>
+  <button class="btn btn-primary" type="button" id="note-save">Guardar cambio pedido</button>
+  <p class="state" id="note-state" role="status"></p>
+  <ul class="notes" id="notes"></ul>
+  <button class="btn-small" type="button" id="close-panel">Cerrar</button>
+</aside>
+
+<script src="app.js"></script>
+<script type="module" src="glass3d.js"></script>
+</body>
+</html>

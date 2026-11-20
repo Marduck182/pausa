@@ -1,0 +1,169 @@
+<!-- Diseño B, Cristal oscuro. Los marcadores data-dock y data-pillstage los rellena app.js. -->
+
+<section class="item" data-screen="B Inicio">
+  <div class="phone g">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><div class="brand"><svg class="i"><use href="#i-shield"/></svg>Pausa</div><span class="status-pill"><i class="dot"></i>Activa</span></div>
+      <div class="g-hero">
+        <h2 class="g-title">3 apps<br>bloqueadas</h2>
+        <p class="g-sub">Hoy usaste 0 min. Esta semana evitaste 95 aperturas.</p>
+      </div>
+      <div class="g-action">
+        <button class="glassbtn" type="button" data-glass="dark" id="gb-home" aria-label="Concentrarme 30 minutos">
+          <canvas aria-hidden="true"></canvas>
+          <span class="gb-label"><svg class="i"><use href="#i-play"/></svg><b>Concentrarme</b><small data-dur>30 min</small></span>
+        </button>
+        <div class="g-dial glass" role="group" aria-label="Duración">
+          <button class="g-chip" type="button" aria-pressed="false" data-v="15 min">15 min</button>
+          <button class="g-chip" type="button" aria-pressed="true" data-v="30 min">30 min</button>
+          <button class="g-chip" type="button" aria-pressed="false" data-v="1 h">1 h</button>
+          <button class="g-chip" type="button" aria-pressed="false" data-v="2 h">2 h</button>
+        </div>
+      </div>
+      <div class="g-strip">
+        <h4>En cuarentena</h4>
+        <div class="g-tiles">
+          <div class="g-tile glass"><div class="appicon" style="background:oklch(0.68 0.19 45)">B</div><b>Brave</b><span class="badge">Siempre</span></div>
+          <div class="g-tile glass amber"><div class="appicon" style="background:linear-gradient(135deg,oklch(0.55 0.2 260),oklch(0.45 0.18 290))">CR</div><b>Clash Royale</b><span class="badge amber">Estricto</span></div>
+          <div class="g-tile glass"><div class="appicon" style="background:oklch(0.55 0.23 27)"><svg viewBox="0 0 24 24"><path d="M9 6l9 6-9 6z"/></svg></div><b>Shorts</b><span class="badge">Siempre</span></div>
+        </div>
+      </div>
+    </div>
+    <nav class="dock" data-dock="0"></nav>
+  </div>
+  <div class="caption"><div><h2>Inicio</h2><p>La acción es un botón de cristal 3D; la duración es un dial debajo. Las apps son fichas que se deslizan.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="B Apps">
+  <div class="phone g">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Apps</h3><button class="btn-small glass" type="button" style="min-height:48px">+ Añadir app</button></div>
+      <div class="g-shelf">
+        <div class="g-app glass wide">
+          <div class="appicon" style="background:linear-gradient(135deg,oklch(0.55 0.2 260),oklch(0.45 0.18 290));width:54px;height:54px;border-radius:16px">CR</div>
+          <div style="flex:1"><b>Clash Royale</b><small>Estricto, bloqueada hasta las 18:00. No se puede cambiar antes.</small></div>
+          <svg class="i" style="color:var(--amber)"><use href="#i-lock"/></svg>
+        </div>
+        <div class="g-app glass"><div class="g-top"><div class="appicon" style="background:oklch(0.68 0.19 45)">B</div><button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Brave" tabindex="0"></span></button></div><div><b>Brave</b><small>Siempre bloqueada, pausa de 5 s</small></div></div>
+        <div class="g-app glass"><div class="g-top"><div class="appicon" style="background:oklch(0.55 0.23 27)"><svg viewBox="0 0 24 24"><path d="M9 6l9 6-9 6z"/></svg></div><button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Shorts" tabindex="0"></span></button></div><div><b>Shorts</b><small>Siempre, te lleva a Inicio</small></div></div>
+        <div class="g-app glass"><div class="g-top"><div class="appicon" style="background:linear-gradient(135deg,oklch(0.6 0.22 340),oklch(0.62 0.2 25))">In</div><button class="hit"><span class="switch" role="switch" aria-checked="true" aria-label="Controlar Instagram" tabindex="0"></span></button></div><div><b>Instagram</b><small>30 min al día, usaste 12</small></div></div>
+        <div class="g-app glass off"><div class="g-top"><div class="appicon" style="background:oklch(0.5 0.1 235)">X</div><button class="hit"><span class="switch" role="switch" aria-checked="false" aria-label="Controlar X" tabindex="0"></span></button></div><div><b>X</b><small>Pausa de 15 s con respiración</small></div></div>
+      </div>
+    </div>
+    <nav class="dock" data-dock="1"></nav>
+  </div>
+  <div class="caption"><div><h2>Apps</h2><p>Una estantería de fichas de cristal en lugar de una lista. Lo estricto ocupa el ancho completo.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="B Enfoque">
+  <div class="phone g">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Enfoque</h3><span class="status-pill"><i class="dot"></i>En curso</span></div>
+      <div class="g-focus">
+        <div class="g-tube glass prism" role="img" aria-label="Queda el 58% del tiempo"><div class="fill"></div></div>
+        <div class="info">
+          <div><div class="g-time">24:15</div><p>Termina a las 10:45</p><p>Bloqueando 3 apps. Frenaste 12 intentos.</p></div>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:auto">
+        <button class="btn btn-ghost g-hold" type="button"><span>Terminar antes<small class="hint">Mantén pulsado 3 s. Reinicia la racha.</small></span></button>
+        <button class="btn btn-ghost" type="button">+ Extender 15 min</button>
+      </div>
+    </div>
+    <nav class="dock" data-dock="2"></nav>
+  </div>
+  <div class="caption"><div><h2>Enfoque</h2><p>El tiempo es un tubo de cristal que se vacía; el color sube y baja como líquido.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="B Estadísticas">
+  <div class="phone g">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="bar"><h3>Estadísticas</h3></div>
+      <p class="g-lead">95 aperturas evitadas esta semana.</p>
+      <div class="g-bars">
+        <div class="g-bar glass" style="--w:100%;--h:50"><i></i><span>Brave</span><span>41</span></div>
+        <div class="g-bar glass" style="--w:78%;--h:265"><i></i><span>Clash Royale</span><span>32</span></div>
+        <div class="g-bar glass" style="--w:34%;--h:25"><i></i><span>Shorts</span><span>14</span></div>
+        <div class="g-bar glass" style="--w:20%;--h:340"><i></i><span>Instagram</span><span>8</span></div>
+      </div>
+      <div class="g-section"><h4>Por día</h4>
+        <div class="g-week" role="img" aria-label="Aperturas evitadas por día">
+          <div><i style="height:55%"></i>L</div><div><i style="height:70%"></i>M</div><div><i style="height:40%"></i>X</div><div><i style="height:85%"></i>J</div><div><i style="height:60%"></i>V</div><div><i style="height:30%"></i>S</div><div class="today"><i style="height:92%"></i>D</div>
+        </div>
+      </div>
+      <p class="g-sub" style="margin:0">5 días seguidos. Tu mejor racha fue de 9.</p>
+    </div>
+    <nav class="dock" data-dock="3"></nav>
+  </div>
+  <div class="caption"><div><h2>Estadísticas</h2><p>Una frase y barras de cristal teñidas con el color de cada app.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="B Bloqueo">
+  <div class="phone g" id="gblock">
+    <div data-pillstage></div>
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="g-over">
+        <div class="g-lens prism"><div class="appicon" style="background:oklch(0.68 0.19 45)">B</div></div>
+        <h3>Brave está bloqueada</h3>
+        <p>La bloquea tu regla «Siempre». Puedes pedir un pase de 10 minutos.</p>
+      </div>
+      <div class="actions">
+        <button class="glassbtn" type="button" data-glass="dark" id="gb-leave" aria-label="Volver al inicio"><canvas aria-hidden="true"></canvas><span class="gb-label"><b>Volver al inicio</b></span></button>
+        <button class="btn btn-ghost" type="button" data-pass disabled>Pedir pase de 10 min <small data-pass-wait>(en 5 s)</small></button>
+      </div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Bloqueo</h2><p>La app queda en una lente de cristal. «Volver al inicio» despide la pantalla con la cápsula.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="B Pausa">
+  <div class="phone g">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="g-over">
+        <div class="appicon" style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,oklch(0.6 0.22 340),oklch(0.62 0.2 25))">In</div>
+        <h3>Un momento antes de abrir Instagram</h3>
+        <div class="g-sphere prism" data-breath role="img" aria-label="Respira con la esfera"><div class="word"><strong data-word>Inhala</strong><span data-left>5 s</span></div></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" data-go disabled>Continuar <small data-go-wait>(en 5 s)</small></button>
+        <button class="btn btn-ghost" type="button">Mejor no abrirla</button>
+      </div>
+    </div>
+  </div>
+  <div class="caption"><div><h2>Pausa</h2><p>Una esfera de cristal respira; el aro de colores marca el ritmo.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+</section>
+
+<section class="item" data-screen="B Salida">
+  <div class="phone g" id="gpill-phone">
+    <div class="status"><span>9:41</span><span>5G 84</span></div>
+    <div class="screen">
+      <div class="g-over"><h3>Sales de la app</h3><p>Una cápsula de cristal sube desde el dock y se va.</p></div>
+    </div>
+    <div data-pillstage></div>
+    <nav class="dock" data-dock="0"></nav>
+  </div>
+  <div class="caption"><div><h2>Animación de salida</h2><p>Un orbe sube, se estira en cápsula con una flecha que brilla y se desvanece.</p></div><div style="display:grid;gap:8px"><button class="btn-small" type="button" data-replay>Repetir</button><button class="btn-small ask" type="button">Pedir cambio</button></div></div>
+</section>
+
+<section class="study" data-screen="B Estudio del botón">
+  <div class="stage">
+    <button class="glassbtn" type="button" data-glass="dark" id="ms-b" aria-label="Pedir una pausa"><canvas aria-hidden="true"></canvas><span class="gb-label"><svg class="i"><use href="#i-shield"/></svg><b>Pedir una pausa</b></span></button>
+  </div>
+  <div>
+    <h2>Estudio del botón de cristal</h2>
+    <p>Mueve el puntero sobre el botón para inclinarlo. Los controles cambian el material en vivo.</p>
+    <label>Dispersión del color <output data-out="disp">7</output></label>
+    <input type="range" min="0" max="20" step="1" value="7" data-ctl="ms-b" data-key="dispersion">
+    <label>Grosor del cristal <output data-out="thick">1.2</output></label>
+    <input type="range" min="0.2" max="3" step="0.1" value="1.2" data-ctl="ms-b" data-key="thickness">
+    <label>Inclinación con el puntero <output data-out="tilt">1</output></label>
+    <input type="range" min="0" max="2" step="0.1" value="1" data-ctl="ms-b" data-key="tilt">
+    <button class="btn-small ask" type="button" style="margin-top:18px">Pedir cambio</button>
+  </div>
+</section>

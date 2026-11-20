@@ -1,0 +1,96 @@
+/* Piezas de cristal compartidas por el tema Claro y el Oscuro: selector, aro prismático, botón 3D, cápsula de salida y estudio. */
+
+.design-switch { display: flex; padding: 4px; border-radius: 999px; background: oklch(1 0 0 / 0.07); }
+.design-switch button { min-height: 40px; padding: 0 20px; border-radius: 999px; font-size: 0.875rem; color: var(--ink-3); transition: background 0.2s var(--ease), color 0.2s var(--ease); }
+.design-switch button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); }
+.gallery[hidden] { display: none; }
+.load-note { grid-column: 1 / -1; color: var(--ink-3); text-align: center; padding: 40px 0; }
+
+@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --a: 360deg; } }
+@keyframes drift { to { transform: translate3d(-4%, 3%, 0) scale(1.06) rotate(2deg); } }
+
+/* aro prismático: un trazo fino con todos los tonos del espectro que gira despacio */
+.prism { position: relative; }
+.prism::before, .prism::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; }
+.prism::before {
+  padding: 2px;
+  background: conic-gradient(from var(--a), oklch(0.82 0.15 0), oklch(0.88 0.14 60), oklch(0.92 0.13 120), oklch(0.86 0.13 200), oklch(0.8 0.16 280), oklch(0.82 0.15 340), oklch(0.82 0.15 0));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: spin 10s linear infinite; opacity: 0.9;
+}
+.prism::after {
+  background: conic-gradient(from var(--a), oklch(0.82 0.15 0 / 0.5), oklch(0.88 0.14 60 / 0.5), oklch(0.86 0.13 200 / 0.5), oklch(0.8 0.16 280 / 0.5), oklch(0.82 0.15 0 / 0.5));
+  filter: blur(14px); opacity: 0.4; z-index: -1; animation: spin 10s linear infinite;
+}
+
+/* ---------- el botón de cristal 3D ---------- */
+
+.glassbtn { position: relative; display: block; width: 100%; height: 96px; border-radius: 999px; isolation: isolate; touch-action: manipulation; transition: transform 0.15s var(--ease); }
+.glassbtn:active:not(:disabled) { transform: scale(0.97); }
+.glassbtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.glassbtn.sm { width: 164px; height: 56px; }
+.glassbtn canvas {
+  position: absolute; inset: -30px -40px; width: calc(100% + 80px); height: calc(100% + 60px); pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 60%, transparent 100%);
+}
+.glassbtn.sm canvas { inset: -18px -26px; width: calc(100% + 52px); height: calc(100% + 36px); }
+.gb-label {
+  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 10px; pointer-events: none;
+  font-size: 1.125rem; font-weight: 500; color: white; text-shadow: 0 1px 14px oklch(0 0 0 / 0.55), 0 0 2px oklch(0 0 0 / 0.4);
+}
+.glassbtn.sm .gb-label { font-size: 0.9375rem; }
+.gb-label svg { width: 20px; height: 20px; }
+.gb-label small { font-size: 0.875rem; font-weight: 400; opacity: 0.85; white-space: nowrap; }
+/* sin WebGL (o si se liberó el contexto): cristal con el aro prismático en CSS */
+.glassbtn.fallback { background: oklch(1 0 0 / 0.08); backdrop-filter: blur(22px) saturate(170%); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.26), inset 0 0 0 1px oklch(1 0 0 / 0.08); }
+.glassbtn.fallback canvas { display: none; }
+.glassbtn.fallback::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; padding: 2px; animation: spin 10s linear infinite;
+  background: conic-gradient(from var(--a), oklch(0.82 0.15 0), oklch(0.92 0.13 120), oklch(0.86 0.13 200), oklch(0.8 0.16 280), oklch(0.82 0.15 0));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+/* mantener pulsado: la cápsula se llena de luz */
+.glassbtn.g-hold { overflow: visible; touch-action: none; user-select: none; }
+.glassbtn.g-hold::before { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: 999px; transform-origin: left; transform: scaleX(var(--p, 0)); background: oklch(0.85 0.11 295 / 0.45); mix-blend-mode: screen; pointer-events: none; }
+.glassbtn.g-hold > canvas { position: absolute; }
+.gbwrap { position: relative; }
+
+/* ---------- la cápsula que sale del dock ---------- */
+
+.pillstage { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; }
+.pill {
+  position: absolute; left: 50%; bottom: 34px; width: 56px; height: 56px; margin-left: -28px; border-radius: 999px; opacity: 0;
+  display: grid; place-items: center;
+  background: linear-gradient(180deg, oklch(0.34 0.03 285 / 0.5), oklch(0.13 0.02 285 / 0.72));
+  backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.38), inset 0 -12px 20px -10px oklch(0.86 0.10 205 / 0.45), 0 20px 36px -14px oklch(0.75 0.15 295 / 0.7);
+}
+.pill svg { width: 26px; height: 26px; fill: none; stroke: oklch(0.93 0.09 205); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: 0;
+  filter: drop-shadow(0 0 5px oklch(0.88 0.12 205)) drop-shadow(0 0 14px oklch(0.8 0.15 225 / 0.8)); }
+.screen.dim { opacity: 0.35; }
+.phone .screen { transition: opacity 0.5s var(--ease); }
+
+/* ---------- estudio del botón ---------- */
+
+.study { grid-column: 1 / -1; width: 100%; max-width: 1000px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; align-items: center;
+  padding: 36px; border-radius: 32px; position: relative; overflow: hidden; }
+.study > * { position: relative; z-index: 1; }
+.study .stage .glassbtn { height: 150px; max-width: 520px; margin: 0 auto; }
+.study .stage .gb-label { font-size: 1.375rem; }
+.study h2 { margin: 0 0 6px; font-size: 1.25rem; font-weight: 500; }
+.study p { margin: 0 0 18px; font-size: 0.9375rem; }
+.study label { display: flex; justify-content: space-between; font-size: 0.875rem; margin-top: 14px; }
+.study input[type="range"] { width: 100%; height: 32px; }
+@media (max-width: 760px) { .study { grid-template-columns: 1fr; padding: 24px 16px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .prism::before, .prism::after, .glassbtn.fallback::before { animation: none; }
+}
+
+/* mantener pulsado en botones que no son 3D: se llenan de luz */
+.g-hold:not(.glassbtn) { position: relative; overflow: hidden; touch-action: none; user-select: none; }
+.g-hold:not(.glassbtn)::before { content: ""; position: absolute; inset: 0; transform-origin: left; transform: scaleX(var(--p, 0)); background: oklch(0.8 0.11 295 / 0.35); }
+.g-hold:not(.glassbtn) > * { position: relative; }
+.g-hold .hint { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--ink-2); }

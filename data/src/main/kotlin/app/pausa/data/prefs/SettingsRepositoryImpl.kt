@@ -1,10 +1,14 @@
 package app.pausa.data.prefs
 
+import app.pausa.domain.model.BlockExit
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -12,8 +16,10 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.pausa.domain.model.AppSettings
 import app.pausa.domain.model.FocusSession
+import app.pausa.domain.model.SessionCheckpoint
 import app.pausa.domain.model.Target
 import app.pausa.domain.model.TemporaryAllow
+import app.pausa.domain.model.ThemeMode
 import app.pausa.domain.repository.SettingsRepository
 import app.pausa.domain.security.Pattern
 import app.pausa.domain.security.PinHasher
@@ -25,7 +31,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "pausa_settings")
+/**
+ * If the settings file is damaged (a write cut short by a dead battery, say) the store starts empty instead of
+ * throwing on every read, which would leave the guard and every screen failing until the app is reinstalled. The
+ * cost is that the PIN, pattern and exceptions are lost, so it is logged: it is rare and the person should be able
+ * to find out why.
+ */
+private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(
+    name = "pausa_settings",
+    corruptionHandler = ReplaceFileCorruptionHandler { error ->
+        Log.e("PausaSettings", "Settings file was damaged and has been reset", error)
+        emptyPreferences()
+    },
+)
 
 /**
  * Settings, the focus session and temporary passes, in a small local file. The PIN is kept only as a salted hash.
@@ -46,6 +64,9 @@ class SettingsRepositoryImpl(
             patternEnabled = prefs[PATTERN_HASH] != null,
             onboardingDone = prefs[ONBOARDING_DONE] == true,
             exceptions = prefs[EXCEPTIONS] ?: emptySet(),
+            // An unknown value (from a newer version, say) falls back to following the phone.
+            blockExit = prefs[BLOCK_EXIT]?.let { name -> BlockExit.entries.firstOrNull { it.name == name } } ?: BlockExit.HOME,
+            themeMode = prefs[THEME_MODE]?.let { name -> ThemeMode.entries.firstOrNull { it.name == name } } ?: ThemeMode.SYSTEM,
         )
     }
 
@@ -65,12 +86,32 @@ class SettingsRepositoryImpl(
         store.edit { it[COOLDOWN] = seconds.coerceIn(0, AppSettings.MAX_COOLDOWN_SECONDS) }
     }
 
+    override suspend fun setBlockExit(exit: BlockExit) {
+        store.edit { it[BLOCK_EXIT] = exit.name }
+    }
+
+    override suspend fun clearTemporaryAllows() {
+        store.edit { it.remove(ALLOWS) }
+    }
+
+    override suspend fun setThemeMode(mode: ThemeMode) {
+        store.edit { it[THEME_MODE] = mode.name }
+    }
+
     override suspend fun setOnboardingDone() {
         store.edit { it[ONBOARDING_DONE] = true }
     }
 
     override suspend fun setExceptions(packages: Set<String>) {
         store.edit { it[EXCEPTIONS] = packages }
+    }
+
+    override suspend fun addException(packageName: String) {
+        store.edit { it[EXCEPTIONS] = (it[EXCEPTIONS] ?: emptySet()) + packageName }
+    }
+
+    override suspend fun removeException(packageName: String) {
+        store.edit { it[EXCEPTIONS] = (it[EXCEPTIONS] ?: emptySet()) - packageName }
     }
 
     override suspend fun setPin(pin: String?) {
@@ -116,6 +157,24 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override suspend fun checkpoint(): SessionCheckpoint? {
+        val parts = store.data.first()[CHECKPOINT]?.split('|') ?: return null
+        if (parts.size != 3) return null
+        val start = parts[1].toLongOrNull() ?: return null
+        val seen = parts[2].toLongOrNull() ?: return null
+        return SessionCheckpoint(parts[0], start, seen)
+    }
+
+    override suspend fun saveCheckpoint(checkpoint: SessionCheckpoint?) {
+        store.edit {
+            if (checkpoint == null) {
+                it.remove(CHECKPOINT)
+            } else {
+                it[CHECKPOINT] = "${checkpoint.packageName}|${checkpoint.startMillis}|${checkpoint.lastSeenMillis}"
+            }
+        }
+    }
+
     override suspend fun clearAll() {
         store.edit { it.clear() }
     }
@@ -125,10 +184,13 @@ class SettingsRepositoryImpl(
         val PIN_HASH = stringPreferencesKey("pin_hash")
         val PATTERN_HASH = stringPreferencesKey("pattern_hash")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
+        val BLOCK_EXIT = stringPreferencesKey("block_exit")
         val EXCEPTIONS = stringSetPreferencesKey("exceptions")
         val FOCUS_END = longPreferencesKey("focus_end_millis")
         val FOCUS_TARGETS = stringSetPreferencesKey("focus_targets")
         val ALLOWS = stringSetPreferencesKey("temporary_allows")
+        val CHECKPOINT = stringPreferencesKey("session_checkpoint")
 
         fun encodeTarget(target: Target): String = when (target) {
             is Target.App -> "app:${target.packageName}"

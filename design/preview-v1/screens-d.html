@@ -1,0 +1,118 @@
+<!-- Diseño D, índice técnico. El fondo (rejilla, nodos, video) lo construye app.js en #d-bg. -->
+
+<section class="d-hero" data-screen="D Portada">
+  <nav class="d-nav">
+    <div class="left">
+      <span class="d-word d-fade-up" style="animation-delay:200ms">PAUSA // ÍNDEX</span>
+      <div class="d-links">
+        <div class="d-link d-fade-up" style="animation-delay:350ms"><b>01.</b><span>INICIO</span></div>
+        <div class="d-link d-fade-up" style="animation-delay:450ms"><b>02.</b><span>APPS_CONTROLADAS</span></div>
+        <div class="d-link d-fade-up" style="animation-delay:550ms"><b>03.</b><span>ENFOQUE</span></div>
+        <div class="d-link d-fade-up" style="animation-delay:650ms"><b>04.</b><span>ESTADÍSTICAS</span></div>
+      </div>
+    </div>
+    <div class="d-strip d-slide-r" style="animation-delay:600ms">
+      <svg class="i" style="width:15px;height:15px;stroke-width:1.5;color:#fff"><use href="#i-shield"/></svg>
+      <span>SERVICIO</span><span class="acc">[ ACTIVA ]</span><span class="gap">ESTADO:</span><span class="d-chip">PROTEGIDO</span>
+    </div>
+  </nav>
+  <button class="btn-small ask d-ask" type="button">Pedir cambio</button>
+  <h1 class="d-h1 d-fade-up" style="animation-delay:400ms">Un momento antes. Más atención.</h1>
+  <div class="d-bottom">
+    <button class="d-cta d-fade-up" type="button" style="animation-delay:900ms"><span class="star">&#10022;</span><span>Empezar concentración</span></button>
+    <div class="d-card d-slide-r" style="animation-delay:1100ms">
+      <span class="badge-d">SIN CUENTA — SIN INTERNET</span>
+      <div class="body">
+        <svg viewBox="0 0 280 168" preserveAspectRatio="none" aria-hidden="true"><polygon points="0.5,0.5 279.5,0.5 279.5,167.5 30,167.5 0.5,137.5" fill="none" stroke="#AFDDFF" stroke-width="1" vector-effect="non-scaling-stroke"/></svg>
+        <p>Pausa pone un momento entre el impulso y la app. Tú decides las reglas; todo se queda en tu teléfono.</p>
+        <a>VER_PRIVACIDAD</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gallery" style="padding-top:24px">
+  <section class="item" data-screen="D Inicio">
+    <div class="phone d">
+      <div class="status"><span>9:41</span><span>5G 84</span></div>
+      <div class="screen">
+        <div class="bar"><div class="brand"><svg class="i"><use href="#i-shield"/></svg>PAUSA</div><span class="status-pill">[ ACTIVA ]</span></div>
+        <div class="d-plusrow" style="display:flex;gap:18px;align-items:center">
+          <div class="d-frame"><strong>03</strong></div>
+          <div><h2 class="d-title">Apps<br>bloqueadas</h2></div>
+        </div>
+        <p class="d-hint">Hoy usaste 0 min. Esta semana evitaste 95 aperturas.</p>
+        <div class="d-chips" role="group" aria-label="Duración" data-d-chips>
+          <button type="button" aria-pressed="false" data-v="15 MIN">15 min</button><button type="button" aria-pressed="true" data-v="30 MIN">30 min</button><button type="button" aria-pressed="false" data-v="1 H">1 h</button><button type="button" aria-pressed="false" data-v="2 H">2 h</button>
+        </div>
+        <button class="d-btn" type="button"><span>&#10022;</span><span data-d-start>Empezar 30 MIN</span></button>
+        <div class="d-list">
+          <div class="d-item"><span class="ico">B</span><div><b>Brave</b><small>Siempre bloqueada</small></div><span class="d-tag mute">[ SIEMPRE ]</span></div>
+          <div class="d-item"><span class="ico">CR</span><div><b>Clash Royale</b><small>Hasta las 18:00</small></div><span class="d-tag">[ ESTRICTO ]</span></div>
+        </div>
+      </div>
+      <nav class="dock" data-dock="0"></nav>
+    </div>
+    <div class="caption"><div><h2>Inicio</h2><p>Marco cuadrado con el estado, duraciones en una regla de cuatro y etiquetas entre corchetes.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+  </section>
+
+  <section class="item" data-screen="D Apps">
+    <div class="phone d">
+      <div class="status"><span>9:41</span><span>5G 84</span></div>
+      <div class="screen">
+        <div class="bar"><h3>Apps</h3><button class="btn-small" type="button" style="min-height:48px;background:transparent;border-radius:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)">+ AÑADIR</button></div>
+        <div class="d-list" data-d-list>
+          <div class="d-item"><span class="ico">CR</span><div><b>Clash Royale</b><small>Estricto, hasta las 18:00</small></div><span class="d-tag">[ BLOQUEADA ]</span></div>
+          <div class="d-item"><span class="ico">B</span><div><b>Brave</b><small>Siempre, pausa de 5 s</small></div><button class="hit"><span class="d-sw" role="switch" aria-checked="true" aria-label="Controlar Brave" tabindex="0"></span></button></div>
+          <div class="d-item"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9 6l9 6-9 6z"/></svg></span><div><b>Shorts en YouTube</b><small>Siempre, te lleva a Inicio</small></div><button class="hit"><span class="d-sw" role="switch" aria-checked="true" aria-label="Controlar Shorts" tabindex="0"></span></button></div>
+          <div class="d-item"><span class="ico">In</span><div><b>Instagram</b><small>30 min al día, usaste 12</small></div><button class="hit"><span class="d-sw" role="switch" aria-checked="true" aria-label="Controlar Instagram" tabindex="0"></span></button></div>
+          <div class="d-item"><span class="ico">X</span><div><b>X</b><small>Pausa de 15 s</small></div><button class="hit"><span class="d-sw" role="switch" aria-checked="false" aria-label="Controlar X" tabindex="0"></span></button></div>
+        </div>
+      </div>
+      <nav class="dock" data-dock="1"></nav>
+    </div>
+    <div class="caption"><div><h2>Apps</h2><p>Lista de líneas finas con casillas cuadradas. Lo estricto va en azul hielo entre corchetes.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+  </section>
+
+  <section class="item" data-screen="D Estadísticas">
+    <div class="phone d">
+      <div class="status"><span>9:41</span><span>5G 84</span></div>
+      <div class="screen">
+        <div class="bar"><h3>Estadísticas</h3></div>
+        <h2 class="d-title">95 aperturas<br>evitadas</h2>
+        <p class="d-hint">Esta semana. Tu racha: 5 días seguidos, la mejor fue de 9.</p>
+        <div class="d-bars">
+          <div style="--w:100%"><span>[ BRAVE ]</span><span>41</span><i></i></div>
+          <div style="--w:78%"><span>[ CLASH_ROYALE ]</span><span>32</span><i></i></div>
+          <div style="--w:34%"><span>[ SHORTS ]</span><span>14</span><i></i></div>
+          <div style="--w:20%"><span>[ INSTAGRAM ]</span><span>8</span><i></i></div>
+        </div>
+        <div class="d-fact">
+          <svg viewBox="0 0 280 100" preserveAspectRatio="none" aria-hidden="true"><polygon points="0.5,0.5 279.5,0.5 279.5,99.5 30,99.5 0.5,69.5" fill="none" stroke="#AFDDFF" stroke-width="1" vector-effect="non-scaling-stroke"/></svg>
+          <p>Todo se calcula en este teléfono, solo con el nombre de la app y la hora.</p><a>VER_PRIVACIDAD</a>
+        </div>
+      </div>
+      <nav class="dock" data-dock="3"></nav>
+    </div>
+    <div class="caption"><div><h2>Estadísticas</h2><p>Una frase y líneas de una sola unidad de ancho; la ficha con la esquina cortada de la portada.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+  </section>
+
+  <section class="item" data-screen="D Bloqueo">
+    <div class="phone d">
+      <div class="status"><span>9:41</span><span>5G 84</span></div>
+      <div class="screen">
+        <div class="d-over">
+          <div class="d-frame"><strong>B</strong></div>
+          <span class="d-tag">[ BLOQUEADA ]</span>
+          <h3>Brave está<br>bloqueada</h3>
+          <p class="d-hint">La bloquea tu regla «Siempre». Puedes pedir un pase de 10 minutos.</p>
+        </div>
+        <div class="actions">
+          <button class="d-btn" type="button">Volver al inicio</button>
+          <button class="d-btn ghost" type="button" data-pass disabled>Pedir pase de 10 min <small data-pass-wait>(en 5 s)</small></button>
+        </div>
+      </div>
+    </div>
+    <div class="caption"><div><h2>Bloqueo</h2><p>La app en un marco cuadrado con cruz en la esquina; dos acciones, una llena y otra de contorno.</p></div><button class="btn-small ask" type="button">Pedir cambio</button></div>
+  </section>
+</div>

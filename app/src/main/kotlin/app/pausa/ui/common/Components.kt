@@ -2,6 +2,7 @@
 
 package app.pausa.ui.common
 
+import app.pausa.ui.theme.LocalDarkTheme
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,13 +22,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -94,7 +92,12 @@ fun Section(
                     }
                 }
                 if (checked != null) {
-                    Switch(checked = checked, onCheckedChange = onCheckedChange)
+                    // Without this a screen reader says only "switch": it must say what the switch is for.
+                    Switch(
+                        checked = checked,
+                        onCheckedChange = onCheckedChange,
+                        modifier = Modifier.semantics { contentDescription = title },
+                    )
                 }
             }
             if (checked != false) content()
@@ -116,24 +119,27 @@ fun AppRow(
     trailing: @Composable (() -> Unit)? = null,
     supporting: @Composable ColumnScope.() -> Unit = {},
 ) {
-    Column(modifier.fillMaxWidth()) {
+    val dark = LocalDarkTheme.current
+    val shape = if (dark) CircleShape else RoundedCornerShape(24.dp)
+    // The glass is the row: no hairline between rows, a little air instead.
+    Box(modifier.fillMaxWidth().padding(vertical = 5.dp)) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .heightIn(min = 64.dp)
+                .heightIn(min = 72.dp)
+                .glassSurface(shape, dark)
                 .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-                .padding(vertical = 12.dp),
+                .padding(start = 10.dp, end = 20.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            AppIcon(packageName, Modifier.size(40.dp))
+            GlassSphere(size = 52.dp, halo = false, animated = false) { AppIcon(packageName, Modifier.size(32.dp)) }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 supporting()
             }
             trailing?.invoke()
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 
@@ -174,7 +180,7 @@ fun EmptyState(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
         )
-        Button(onClick = onAction, modifier = Modifier.heightIn(min = 48.dp)) { Text(actionLabel) }
+        GlassButton(text = actionLabel, onClick = onAction, modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -183,7 +189,7 @@ fun EmptyState(
  * shimmer: movement that only says "wait" is decoration.
  */
 @Composable
-fun SkeletonRows(count: Int = 5, modifier: Modifier = Modifier) {
+fun SkeletonRows(modifier: Modifier = Modifier, count: Int = 5) {
     val block = MaterialTheme.colorScheme.surfaceContainerHigh
     Column(modifier.fillMaxWidth().semantics { contentDescription = "Cargando" }) {
         repeat(count) {
@@ -294,5 +300,16 @@ fun TimeDialog(
         confirmButton = { TextButton(onClick = { onConfirm(state.hour * 60 + state.minute) }) { Text("Aceptar") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
         text = { TimePicker(state = state) },
+    )
+}
+
+/** Tells the person why something was not done. Shown while [message] is not null; [onDismiss] clears it. */
+@Composable
+fun NoticeDialog(message: String?, onDismiss: () -> Unit) {
+    if (message == null) return
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text("Entendido") } },
     )
 }

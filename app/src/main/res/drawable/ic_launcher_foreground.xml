@@ -1,35 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The shield with a double line and two pause bars (icon E8). Drawn on the 108 dp adaptive-icon canvas; the shield
-    spans 27 to 81, inside the 66 dp safe zone, so no launcher mask cuts it. The same shape is used as the themed
-    (monochrome) icon.
+    The launcher icon: a sphere of glass (a highlight at the top left, coloured light at the bottom) with a thin ring of
+    every colour of the spectrum, and the shield of Pausa inside. It is the material of the app's own spheres.
+    Drawn on the 108 dp adaptive-icon canvas; the ring reaches radius 30, inside the 33 dp safe radius, so no launcher
+    mask cuts it.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- a soft glow behind the sphere -->
     <path
-        android:pathData="M54,24 L81,35 L81,54 C81,69 70,79 54,86 C38,79 27,69 27,54 L27,35 Z"
-        android:strokeColor="#B9A7FF"
-        android:strokeWidth="4"
-        android:strokeLineJoin="round" />
+        android:pathData="M54,54 m-30,0 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0"
+        android:fillAlpha="0.35">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="sweep"
+                android:centerX="54"
+                android:centerY="54">
+                <item android:color="#F28BB5" android:offset="0.0" />
+                <item android:color="#F7B77E" android:offset="0.2" />
+                <item android:color="#8FE3C2" android:offset="0.45" />
+                <item android:color="#7FD6F2" android:offset="0.65" />
+                <item android:color="#A99BFF" android:offset="0.85" />
+                <item android:color="#F28BB5" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- the body of the sphere -->
+    <path
+        android:pathData="M54,54 m-27,0 a27,27 0 1,0 54,0 a27,27 0 1,0 -54,0"
+        android:fillColor="#1AFFFFFF" />
+    <path android:pathData="M54,54 m-27,0 a27,27 0 1,0 54,0 a27,27 0 1,0 -54,0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="43"
+                android:centerY="40"
+                android:gradientRadius="26">
+                <item android:color="#CCFFFFFF" android:offset="0.0" />
+                <item android:color="#00FFFFFF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M54,54 m-27,0 a27,27 0 1,0 54,0 a27,27 0 1,0 -54,0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="62"
+                android:centerY="82"
+                android:gradientRadius="30">
+                <item android:color="#99A99BFF" android:offset="0.0" />
+                <item android:color="#00A99BFF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- the ring of every colour -->
+    <path
+        android:pathData="M54,54 m-27,0 a27,27 0 1,0 54,0 a27,27 0 1,0 -54,0"
+        android:strokeWidth="2.4">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="sweep"
+                android:centerX="54"
+                android:centerY="54">
+                <item android:color="#F28BB5" android:offset="0.0" />
+                <item android:color="#F7B77E" android:offset="0.17" />
+                <item android:color="#D6E88A" android:offset="0.34" />
+                <item android:color="#8FE3C2" android:offset="0.5" />
+                <item android:color="#7FD6F2" android:offset="0.67" />
+                <item android:color="#A99BFF" android:offset="0.84" />
+                <item android:color="#F28BB5" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- the shield, smaller so it sits inside the sphere -->
     <group
         android:pivotX="54"
         android:pivotY="54"
-        android:scaleX="0.74"
-        android:scaleY="0.74">
+        android:scaleX="0.6"
+        android:scaleY="0.6">
         <path
             android:pathData="M54,24 L81,35 L81,54 C81,69 70,79 54,86 C38,79 27,69 27,54 L27,35 Z"
-            android:strokeColor="#B9A7FF"
-            android:strokeAlpha="0.5"
-            android:strokeWidth="4"
-            android:strokeLineJoin="round" />
+            android:strokeWidth="4.2"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:strokeColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="30"
+                    android:startY="26"
+                    android:endX="78"
+                    android:endY="84">
+                    <item android:color="#F2EEFF" android:offset="0.0" />
+                    <item android:color="#B9A7FF" android:offset="1.0" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <group
+            android:pivotX="54"
+            android:pivotY="54"
+            android:scaleX="0.74"
+            android:scaleY="0.74">
+            <path
+                android:pathData="M54,24 L81,35 L81,54 C81,69 70,79 54,86 C38,79 27,69 27,54 L27,35 Z"
+                android:strokeColor="#F2EEFF"
+                android:strokeAlpha="0.55"
+                android:strokeWidth="4.2"
+                android:strokeLineJoin="round" />
+        </group>
+        <path
+            android:fillColor="#F2EEFF"
+            android:pathData="M46.5,48.5 A2.5,2.5 0 0 1 51.5,48.5 L51.5,60.5 A2.5,2.5 0 0 1 46.5,60.5 Z" />
+        <path
+            android:fillColor="#F2EEFF"
+            android:pathData="M56.5,48.5 A2.5,2.5 0 0 1 61.5,48.5 L61.5,60.5 A2.5,2.5 0 0 1 56.5,60.5 Z" />
     </group>
-    <path
-        android:fillColor="#B9A7FF"
-        android:pathData="M46.5,48.5 A2.5,2.5 0 0 1 51.5,48.5 L51.5,60.5 A2.5,2.5 0 0 1 46.5,60.5 Z" />
-    <path
-        android:fillColor="#B9A7FF"
-        android:pathData="M56.5,48.5 A2.5,2.5 0 0 1 61.5,48.5 L61.5,60.5 A2.5,2.5 0 0 1 56.5,60.5 Z" />
 </vector>

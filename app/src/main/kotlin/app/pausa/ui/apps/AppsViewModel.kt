@@ -1,5 +1,6 @@
 package app.pausa.ui.apps
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pausa.domain.model.FeatureCatalog
@@ -13,17 +14,20 @@ import app.pausa.domain.repository.RuleRepository
 import app.pausa.domain.repository.StatsRepository
 import app.pausa.domain.repository.UsageRepository
 import app.pausa.domain.usecase.RuleLock
+import app.pausa.domain.usecase.RuleLockChecker
 import app.pausa.ui.common.RuleText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -56,8 +60,18 @@ class AppsViewModel @Inject constructor(
     installedApps: InstalledAppsRepository,
     usageRepository: UsageRepository,
     private val stats: StatsRepository,
+    private val locks: RuleLockChecker,
     private val clock: Clock,
 ) : ViewModel() {
+
+    private val _notice = MutableStateFlow<String?>(null)
+
+    /** Why the last action was not done, or null. Shown in a dialog until the person dismisses it. */
+    val notice: StateFlow<String?> = _notice.asStateFlow()
+
+    fun dismissNotice() {
+        _notice.value = null
+    }
 
     /** Follows the calendar day, so the usage shown starts again at midnight even if the screen stays open. */
     private val usage = flow {
@@ -92,7 +106,11 @@ class AppsViewModel @Inject constructor(
                         packageName = rule.target.packageName,
                         label = if (target is Target.Feature) "${FeatureCatalog.displayName(target.featureId)} · $app" else app,
                         enabled = rule.enabled,
-                        summary = RuleText.summary(draft),
+                        summary = if (rule.unreadable) {
+                            "No se pudo leer esta regla. Se bloquea hasta que la configures de nuevo."
+                        } else {
+                            RuleText.summary(draft)
+                        },
                         usageToday = if (target is Target.App) RuleText.usageToday(draft, usage[rule.target.packageName]) else null,
                         locked = RuleLock.isLocked(rule, snapshot, now),
                     )
@@ -105,14 +123,26 @@ class AppsViewModel @Inject constructor(
     /** Turning a rule off is giving in, so it is recorded; turning it on is not. */
     fun setEnabled(ruleId: Long, enabled: Boolean) {
         viewModelScope.launch {
-            val rule = rules.getRules().firstOrNull { it.id == ruleId } ?: return@launch
-            rules.upsert(rule.copy(enabled = enabled))
-            if (!enabled) {
-                val now = clock.instant()
-                stats.record(
-                    InterventionEvent(now, rule.target.packageName, InterventionOutcome.RULE_DISABLED),
-                    now.atZone(clock.zone).toLocalDate().toEpochDay(),
-                )
+            try {
+                val rule = rules.getRules().firstOrNull { it.id == ruleId } ?: return@launch
+                // Asked again here: the list may have been drawn before a hard-mode block started.
+                if (locks.isRuleLocked(ruleId)) {
+                    _notice.value = RuleMessages.LOCKED
+                    return@launch
+                }
+                rules.upsert(rule.copy(enabled = enabled))
+                if (!enabled) {
+                    val now = clock.instant()
+                    stats.record(
+                        InterventionEvent(now, rule.target.packageName, InterventionOutcome.RULE_DISABLED),
+                        now.atZone(clock.zone).toLocalDate().toEpochDay(),
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("PausaApps", "Could not change rule $ruleId", e)
+                _notice.value = RuleMessages.SAVE_FAILED
             }
         }
     }

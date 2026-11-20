@@ -1,18 +1,22 @@
 package app.pausa.ui.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pausa.domain.model.InstalledApp
 import app.pausa.domain.repository.InstalledAppsRepository
 import app.pausa.domain.repository.SettingsRepository
+import app.pausa.domain.usecase.RuleLockChecker
 import app.pausa.enforcement.SystemPackages
+import app.pausa.ui.apps.RuleMessages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -27,9 +31,19 @@ data class ExceptionsUiState(
 @HiltViewModel
 class ExceptionsViewModel @Inject constructor(
     private val settings: SettingsRepository,
+    private val locks: RuleLockChecker,
     installedApps: InstalledAppsRepository,
     systemPackages: SystemPackages,
 ) : ViewModel() {
+
+    private val _notice = MutableStateFlow<String?>(null)
+
+    /** Why the last action was not done, or null. Shown in a dialog until the person dismisses it. */
+    val notice: StateFlow<String?> = _notice.asStateFlow()
+
+    fun dismissNotice() {
+        _notice.value = null
+    }
 
     private val apps = MutableStateFlow<List<InstalledApp>?>(null)
     private val query = MutableStateFlow("")
@@ -62,8 +76,20 @@ class ExceptionsViewModel @Inject constructor(
 
     fun setAllowed(packageName: String, allowed: Boolean) {
         viewModelScope.launch {
-            val current = settings.settings.first().exceptions
-            settings.setExceptions(if (allowed) current + packageName else current - packageName)
+            try {
+                // An exception lets an app through, so it waits while a focus session or a strict block is on.
+                if (allowed && locks.isAnyProtectionActive()) {
+                    _notice.value = "Hay una concentración o un bloqueo estricto en curso. Las excepciones se pueden añadir cuando termine."
+                    return@launch
+                }
+                // One atomic change: two quick toggles must not overwrite each other with a stale copy of the set.
+                if (allowed) settings.addException(packageName) else settings.removeException(packageName)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("PausaExceptions", "Could not change exception for $packageName", e)
+                _notice.value = RuleMessages.SAVE_FAILED
+            }
         }
     }
 }

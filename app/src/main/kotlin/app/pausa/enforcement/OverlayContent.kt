@@ -1,5 +1,7 @@
 package app.pausa.enforcement
 
+import app.pausa.ui.theme.LocalDarkTheme
+import app.pausa.ui.common.GlassGhostAction
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -11,19 +13,18 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,15 +42,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pausa.ui.common.AppIcon
-import app.pausa.ui.common.AppIconRing
+import app.pausa.ui.common.GlassButton
+import app.pausa.ui.common.GlassGhostButton
+import app.pausa.ui.common.GlassSphere
+import app.pausa.ui.common.GlassStage
 import app.pausa.ui.common.PatternChallenge
-import app.pausa.ui.common.Ring
+import app.pausa.domain.model.ThemeMode
 import app.pausa.ui.theme.NumeralStyle
 import app.pausa.ui.theme.PausaTheme
 import kotlinx.coroutines.delay
 
 /*
- * The three screens Pausa draws over another app, in the Noche design: black, one ring, one accent. They appear at
+ * The three screens Pausa draws over another app, in the current look (Oscuro or Claro): glass, one sphere, one action. They appear at
  * the moment of the impulse, so each is read in a second, used with one thumb (the actions sit at the bottom, where
  * the thumb already is) and never leaves the user without a way out.
  *
@@ -68,8 +72,9 @@ fun InterventionContent(
     breathing: Boolean,
     onCancel: () -> Unit,
     onContinue: () -> Unit,
+    themeMode: ThemeMode,
 ) {
-    PausaTheme {
+    PausaTheme(themeMode) {
         var remaining by remember { mutableIntStateOf(waitSeconds) }
         LaunchedEffect(Unit) {
             while (remaining > 0) {
@@ -79,7 +84,7 @@ fun InterventionContent(
         }
 
         OverlayFrame(
-            icon = { AppIcon(packageName, Modifier.size(56.dp)) },
+            icon = { GlassSphere(size = 88.dp, halo = false, blur = true) { AppIcon(packageName, Modifier.size(52.dp)) } },
             title = "¿Abrir $appLabel?",
             message = if (breathing || waitSeconds == 0) null else "Tómate un momento antes de entrar.",
             body = { if (waitSeconds > 0) PauseRing(remaining, waitSeconds, breathing) },
@@ -107,8 +112,9 @@ fun BlockContent(
     temporaryAllowMinutes: Int?,
     waitSeconds: Int,
     onAllowTemporarily: () -> Unit,
+    themeMode: ThemeMode,
 ) {
-    PausaTheme {
+    PausaTheme(themeMode) {
         var remaining by remember { mutableIntStateOf(waitSeconds) }
         LaunchedEffect(Unit) {
             while (remaining > 0) {
@@ -118,7 +124,15 @@ fun BlockContent(
         }
 
         OverlayFrame(
-            icon = { AppIconRing(packageName, color = MaterialTheme.colorScheme.primary) },
+            icon = {
+                val compact = rememberCompactHeight()
+                // The halo spills about 70 dp past the sphere, so it gets that much room above and below.
+                Box(Modifier.padding(vertical = if (compact) 4.dp else HALO_ROOM)) {
+                    GlassSphere(size = if (compact) 112.dp else 168.dp, halo = !compact, blur = true) {
+                        AppIcon(packageName, Modifier.size(if (compact) 52.dp else 76.dp))
+                    }
+                }
+            },
             title = title,
             message = message,
             primaryLabel = dismissLabel,
@@ -143,10 +157,11 @@ fun PatternLockContent(
     verify: suspend (List<Int>) -> Boolean,
     onUnlocked: () -> Unit,
     onCancel: () -> Unit,
+    themeMode: ThemeMode,
 ) {
-    PausaTheme {
+    PausaTheme(themeMode) {
         OverlayFrame(
-            icon = { AppIcon(packageName, Modifier.size(56.dp)) },
+            icon = { GlassSphere(size = 88.dp, halo = false, blur = true) { AppIcon(packageName, Modifier.size(52.dp)) } },
             title = "Dibuja tu patrón",
             message = "para abrir $appLabel",
             body = {
@@ -155,8 +170,8 @@ fun PatternLockContent(
                     onVerified = onUnlocked,
                     idleHint = "",
                     modifier = Modifier
-                        .padding(top = 24.dp)
-                        .widthIn(max = 320.dp)
+                        .padding(top = if (rememberCompactHeight()) 8.dp else 24.dp)
+                        .widthIn(max = if (rememberCompactHeight()) 200.dp else 320.dp)
                         .fillMaxWidth(),
                 )
             },
@@ -187,14 +202,16 @@ private fun OverlayFrame(
     body: @Composable () -> Unit = {},
 ) {
     val animationsOff = rememberAnimationsOff()
+    val compact = rememberCompactHeight()
     var visible by remember { mutableStateOf(animationsOff) }
     LaunchedEffect(Unit) { visible = true }
 
+    // The video plays here too, in the dark look: this is the screen that appears at the moment of the impulse.
+    GlassStage(video = true) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 28.dp, vertical = 48.dp),
+            .padding(horizontal = 28.dp, vertical = if (compact) 12.dp else 48.dp),
     ) {
         // A short fade and a small rise: it says "this just appeared" without making anyone wait for it.
         AnimatedVisibility(
@@ -207,12 +224,13 @@ private fun OverlayFrame(
                     slideInVertically(tween(ENTER_MILLIS, easing = FastOutSlowInEasing)) { it / 40 }
             },
         ) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                icon()
+                // Room around the icon: a scrolling container clips whatever sticks out of it, and a ring's stroke sticks out by half.
+                Box(Modifier.padding(4.dp)) { icon() }
                 Text(
                     text = title,
                     style = MaterialTheme.typography.headlineSmall,
@@ -226,35 +244,43 @@ private fun OverlayFrame(
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.86f),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
                 body()
             }
+            }
         }
 
         if (primaryLabel != null) {
-            Button(
-                onClick = onPrimary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 52.dp),
-            ) { Text(primaryLabel, style = MaterialTheme.typography.titleMedium) }
+            // Oscuro: the same quiet glass as every other button, tinted to mark the main choice. Claro keeps the sphere material.
+            if (LocalDarkTheme.current) {
+                GlassGhostAction(onClick = onPrimary, modifier = Modifier.fillMaxWidth(), emphasized = true) { Text(primaryLabel) }
+            } else {
+                GlassButton(text = primaryLabel, onClick = onPrimary, modifier = Modifier.fillMaxWidth())
+            }
         }
         if (secondaryLabel != null) {
-            TextButton(
+            GlassGhostButton(
+                text = secondaryLabel,
                 onClick = onSecondary,
                 enabled = secondaryEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 52.dp)
-                    .padding(top = if (primaryLabel != null) 4.dp else 0.dp),
-            ) { Text(secondaryLabel, style = MaterialTheme.typography.titleMedium) }
+                    .padding(top = if (primaryLabel != null) 10.dp else 0.dp),
+            )
         }
     }
+    }
 }
+
+/** True when the screen has little height (a phone held on its side): margins and shapes shrink to fit. */
+@Composable
+private fun rememberCompactHeight(): Boolean = LocalConfiguration.current.screenHeightDp < COMPACT_HEIGHT_DP
+
+private const val COMPACT_HEIGHT_DP = 480
 
 /** True when the user turned animations off in system settings. Everything that moves must then stand still. */
 @Composable
@@ -265,14 +291,10 @@ private fun rememberAnimationsOff(): Boolean {
     }
 }
 
-/**
- * The ring of a pause: it empties as the wait runs out, with the seconds left inside. If the rule asks for a breathing
- * exercise the ring also swells and settles over four seconds each way and the word inside says which. With animations
- * off the ring stays still and only the words change.
- */
+/** Between 0.86 and 1 while [active], following the breath; a constant 1 otherwise, with nothing running. */
 @Composable
-private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
-    val animationsOff = rememberAnimationsOff()
+private fun rememberSwell(active: Boolean): Float {
+    if (!active) return 1f
     val transition = rememberInfiniteTransition(label = "breathing")
     val swell by transition.animateFloat(
         initialValue = 0.86f,
@@ -280,6 +302,19 @@ private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
         animationSpec = infiniteRepeatable(tween(BREATH_MILLIS, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "swell",
     )
+    return swell
+}
+
+/**
+ * The sphere of a pause: the seconds left inside. If the rule asks for a breathing exercise the sphere also swells and
+ * settles over four seconds each way and the word inside says which. With animations off it stays still and only the
+ * words change.
+ */
+@Composable
+private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
+    val animationsOff = rememberAnimationsOff()
+    // The animation exists only while it is used: an endless transition redraws every frame even when nothing shows it.
+    val swell = rememberSwell(active = breathing && !animationsOff)
     var inhale by remember { mutableStateOf(true) }
     LaunchedEffect(breathing) {
         while (breathing) {
@@ -288,14 +323,13 @@ private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
         }
     }
 
-    Ring(
-        color = MaterialTheme.colorScheme.primary,
-        size = 168.dp,
-        progress = remaining.toFloat() / total,
-        animate = !animationsOff,
+    val compact = rememberCompactHeight()
+    GlassSphere(
+        size = if (compact) 112.dp else 168.dp,
+        halo = !compact,
         modifier = Modifier
-            .padding(top = 32.dp)
-            .scale(if (breathing && !animationsOff) swell else 1f),
+            .padding(vertical = if (compact) 8.dp else HALO_ROOM)
+            .scale(swell),
     ) {
         when {
             breathing -> Text(
@@ -305,7 +339,7 @@ private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
             )
             remaining > 0 -> Text(
                 remaining.toString(),
-                style = NumeralStyle.copy(fontSize = 56.sp, lineHeight = 60.sp),
+                style = NumeralStyle.copy(fontSize = if (compact) 40.sp else 56.sp, lineHeight = if (compact) 44.sp else 60.sp),
                 color = MaterialTheme.colorScheme.onBackground,
             )
             else -> Text("Listo", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -314,4 +348,7 @@ private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
 }
 
 private const val BREATH_MILLIS = 4_000
+
+/** What a sphere's halo needs above and below it so nothing clips it. */
+private val HALO_ROOM = 64.dp
 private const val ENTER_MILLIS = 220

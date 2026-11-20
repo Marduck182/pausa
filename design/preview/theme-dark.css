@@ -1,0 +1,112 @@
+/* Tema Oscuro: composiciones del B, el fondo vivo del C2 dentro de cada pantalla y la cápsula como forma de casi todo. */
+
+.phone.dk {
+  --bg: oklch(0.1 0.015 285); --ink: oklch(0.97 0.005 285); --ink-2: oklch(0.84 0.012 285); --ink-3: oklch(0.72 0.014 285);
+  --primary: oklch(0.82 0.11 295); --on-primary: oklch(0.2 0.05 285); --line: oklch(1 0 0 / 0.1);
+  --glass: oklch(1 0 0 / 0.07); --glass-hi: oklch(1 0 0 / 0.14);
+  --edge: inset 0 1px 0 oklch(1 0 0 / 0.28), inset 0 0 0 1px oklch(1 0 0 / 0.08), inset 0 -12px 20px -12px oklch(0.86 0.10 205 / 0.18);
+  --blur: blur(22px) saturate(170%);
+  background: #05040a;
+}
+.phone.dk .screen { z-index: 1; }
+.phone.dk .status span:last-child { color: var(--ink-2); }
+
+/* fondo vivo: video, rejilla de 1 px y cruces; el cristal refracta lo que hay detrás */
+.app-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.app-bg video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; }
+.app-bg .scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); }
+.app-bg .grid { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px); background-size: 25% 100%, 100% 33.33%; }
+.app-bg .plus { position: absolute; width: 10px; height: 10px; transform: translate(-50%, -50%); }
+.app-bg .plus::before, .app-bg .plus::after { content: ""; position: absolute; background: rgba(255, 255, 255, 0.7); }
+.app-bg .plus::before { left: 0; top: 4.5px; width: 10px; height: 1px; }
+.app-bg .plus::after { left: 4.5px; top: 0; width: 1px; height: 10px; }
+
+/* la cápsula de cristal en CSS: la forma de chips, filas, estado, interruptores y botones secundarios */
+.phone.dk .capsule, .phone.dk .cap-btn, .phone.dk .g-chip, .phone.dk .cap-pill, .phone.dk .cap-row, .phone.dk .status-pill, .phone.dk .g-bar, .phone.dk .g-tube, .phone.dk .btn-ghost {
+  background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: var(--edge);
+}
+.phone.dk .capsule, .phone.dk .cap-btn, .phone.dk .cap-pill, .phone.dk .cap-row { position: relative; border-radius: 999px; }
+.phone.dk .capsule::before, .phone.dk .cap-row::before, .phone.dk .cap-pill::before, .phone.dk .cap-btn::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0.5;
+  background: conic-gradient(from var(--a), oklch(0.82 0.15 0), oklch(0.88 0.14 60), oklch(0.92 0.13 120), oklch(0.86 0.13 200), oklch(0.8 0.16 280), oklch(0.82 0.15 340), oklch(0.82 0.15 0));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: spin 14s linear infinite;
+}
+.cap-btn { min-height: 52px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 500; color: var(--ink); transition: background 0.2s var(--ease); }
+.cap-btn:hover { background: var(--glass-hi); }
+.cap-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cap-btn small { font-weight: 400; opacity: 0.8; }
+.phone.dk .status-pill { padding: 0 14px; min-height: 32px; }
+.phone.dk .switch { background: oklch(1 0 0 / 0.16); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.25); }
+.phone.dk .switch[aria-checked="true"] { background: linear-gradient(135deg, oklch(0.8 0.11 295), oklch(0.88 0.1 205)); }
+.phone.dk .dock { background: oklch(0.14 0.02 285 / 0.55); box-shadow: var(--edge), 0 18px 28px -16px black; backdrop-filter: var(--blur); }
+.phone.dk .tab[aria-current="page"] { background: var(--glass-hi); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.34), 0 0 22px oklch(0.8 0.12 295 / 0.4); color: var(--ink); }
+.phone.dk .bar h3 { font-weight: 500; }
+
+.g-title { margin: 0; font-size: 2.5rem; font-weight: 400; letter-spacing: -0.03em; line-height: 1.04; text-wrap: balance; }
+.g-sub { margin: 10px 0 0; color: var(--ink-2); max-width: 30ch; }
+.g-hero { padding-top: 6px; }
+.g-action { display: flex; flex-direction: column; gap: 14px; padding: 8px 0 4px; }
+.g-dial { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.g-chip { min-height: 44px; border-radius: 999px; font-size: 0.9375rem; color: var(--ink-2); transition: background 0.2s var(--ease), color 0.2s var(--ease); }
+.phone.dk .g-chip[aria-pressed="true"] { background: oklch(0.8 0.11 295 / 0.3); color: var(--ink); box-shadow: var(--edge), 0 0 18px oklch(0.8 0.12 295 / 0.4); }
+.g-section h4, .g-strip h4 { margin: 0 0 10px; font-size: 1rem; font-weight: 500; color: var(--ink-2); }
+.cap-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.cap-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 6px; font-size: 0.9375rem; }
+.cap-pill .appicon { width: 32px; height: 32px; border-radius: 50%; font-size: 0.75rem; }
+.cap-pill .appicon svg { width: 16px; height: 16px; }
+.cap-pill.amber { background: oklch(0.72 0.13 75 / 0.2); }
+
+.cap-rows { display: flex; flex-direction: column; gap: 10px; }
+.cap-row { display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center; padding: 8px 14px 8px 8px; min-height: 72px; }
+.cap-row .appicon { width: 52px; height: 52px; border-radius: 50%; font-size: 1rem; }
+.cap-row .appicon svg { width: 22px; height: 22px; }
+.cap-row b { font-weight: 500; display: block; }
+.cap-row small { color: var(--ink-3); font-size: 0.8125rem; display: block; }
+.cap-row.amber { background: oklch(0.72 0.13 75 / 0.18); }
+.cap-row.amber small { color: oklch(0.88 0.07 75); }
+
+.g-focus { display: flex; gap: 24px; align-items: stretch; }
+.g-tube { flex: none; width: 96px; height: 340px; border-radius: 999px; position: relative; overflow: hidden; }
+.g-tube .fill { position: absolute; left: 7px; right: 7px; bottom: 7px; height: 58%; border-radius: 999px; background: linear-gradient(to top, oklch(0.78 0.12 295), oklch(0.88 0.09 205));
+  box-shadow: inset 0 2px 0 oklch(1 0 0 / 0.45), 0 0 28px oklch(0.8 0.12 270 / 0.5); }
+.g-focus .info { display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0; }
+.g-time { font-size: 3.5rem; font-weight: 400; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.g-focus p { margin: 6px 0 0; color: var(--ink-2); }
+
+.g-lead { margin: 0; font-size: 1.75rem; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; text-wrap: balance; }
+.g-bars { display: flex; flex-direction: column; gap: 10px; }
+.g-bar { position: relative; height: 48px; border-radius: 999px; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; font-size: 0.9375rem; }
+.g-bar i { position: absolute; inset: 4px auto 4px 4px; width: calc(var(--w) - 8px); min-width: 36px; border-radius: 999px; background: linear-gradient(90deg, oklch(0.5 0.18 var(--h) / 0.9), oklch(0.78 0.14 var(--h) / 0.9)); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.4); }
+.g-bar span { position: relative; text-shadow: 0 1px 8px oklch(0 0 0 / 0.5); }
+.g-week { display: flex; gap: 8px; height: 132px; align-items: flex-end; }
+.g-week div { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; font-size: 0.8125rem; color: var(--ink-3); }
+.g-week i { width: 100%; border-radius: 999px; background: linear-gradient(to top, oklch(0.8 0.11 295 / 0.55), oklch(0.88 0.09 205 / 0.55)); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.35); }
+.g-week .today i { background: linear-gradient(to top, oklch(0.8 0.11 295), oklch(0.9 0.09 205)); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.55), 0 0 18px oklch(0.8 0.12 270 / 0.5); }
+
+.g-over { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; margin: auto 0; }
+.g-over h3 { margin: 0; font-size: 1.75rem; font-weight: 500; letter-spacing: -0.02em; text-wrap: balance; }
+.g-over p { margin: 0; color: var(--ink-2); max-width: 28ch; text-wrap: pretty; }
+.g-lens { width: 168px; height: 168px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 6px;
+  background: radial-gradient(circle at 32% 22%, oklch(1 0 0 / 0.3), transparent 38%), radial-gradient(circle at 50% 50%, oklch(1 0 0 / 0.06), oklch(1 0 0 / 0.02));
+  backdrop-filter: var(--blur); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.4), inset 0 -26px 40px -18px oklch(0.86 0.10 205 / 0.35), 0 26px 40px -24px oklch(0.7 0.15 295 / 0.6); }
+.g-lens .appicon { width: 74px; height: 74px; border-radius: 22px; font-size: 1.5rem; box-shadow: 0 8px 22px -8px black; }
+.g-sphere { width: 200px; height: 200px; border-radius: 50%; display: grid; place-items: center; transform: scale(var(--s, 0.86)); transition: transform 4s ease-in-out;
+  background: radial-gradient(circle at 32% 20%, oklch(1 0 0 / 0.34), transparent 36%), radial-gradient(circle at 70% 88%, oklch(0.8 0.12 295 / 0.45), transparent 56%), oklch(1 0 0 / 0.04);
+  backdrop-filter: var(--blur); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.4), inset 0 -24px 40px -16px oklch(0.86 0.10 205 / 0.35), 0 24px 50px -22px oklch(0.7 0.15 295 / 0.6); }
+.g-sphere .word { text-align: center; transform: scale(calc(1 / var(--s, 0.86))); }
+.g-sphere strong { display: block; font-size: 1.5rem; font-weight: 500; }
+.g-sphere span { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+.study.dk { background: #05040a; box-shadow: inset 0 0 0 1px var(--line); color: oklch(0.97 0.005 285); --ink-2: oklch(0.84 0.012 285); --primary: oklch(0.82 0.11 295); }
+.study.dk p { color: var(--ink-2); }
+.study.dk input[type="range"] { accent-color: var(--primary); }
+.study.dk .btn-small { background: oklch(1 0 0 / 0.08); color: inherit; box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.26); }
+.study.dk .app-bg { z-index: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .phone.dk .capsule::before, .phone.dk .cap-row::before, .phone.dk .cap-pill::before, .phone.dk .cap-btn::before { animation: none; }
+  .g-sphere { transition: none; transform: none; }
+  .g-sphere .word { transform: none; }
+}

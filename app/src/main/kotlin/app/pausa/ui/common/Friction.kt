@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -28,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import app.pausa.domain.model.AppSettings
 import app.pausa.domain.repository.SettingsRepository
+import app.pausa.domain.security.AttemptResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -93,8 +93,8 @@ fun Friction.Dialog() {
     var remaining by remember(request) { mutableIntStateOf(if (request.wait) cooldownSeconds else 0) }
     var pin by remember(request) { mutableStateOf("") }
     var wrong by remember(request) { mutableStateOf(false) }
-    var failures by remember(request) { mutableIntStateOf(0) }
-    var lockedSeconds by remember(request) { mutableIntStateOf(0) }
+    // The wait may already be running from an earlier dialog: the count is not this dialog's to reset.
+    var lockedSeconds by remember(request) { mutableIntStateOf(Attempts.seconds(Attempts.pin.remainingLockMillis(Attempts.now()))) }
     var checking by remember(request) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -156,18 +156,21 @@ fun Friction.Dialog() {
                     } else {
                         checking = true
                         scope.launch {
-                            val ok = verifyPin(pin)
+                            val result = Attempts.pin.attempt(Attempts::now) { verifyPin(pin) }
                             checking = false
-                            if (ok) {
-                                pending = null
-                                request.onConfirmed()
-                            } else {
-                                wrong = true
-                                pin = ""
-                                failures++
-                                if (failures >= MAX_FAILURES) {
-                                    failures = 0
-                                    lockedSeconds = LOCK_SECONDS
+                            when (result) {
+                                AttemptResult.Success -> {
+                                    pending = null
+                                    request.onConfirmed()
+                                }
+                                is AttemptResult.Wrong -> {
+                                    wrong = true
+                                    pin = ""
+                                    if (result.lockedForMillis > 0) lockedSeconds = Attempts.seconds(result.lockedForMillis)
+                                }
+                                is AttemptResult.Locked -> {
+                                    pin = ""
+                                    lockedSeconds = Attempts.seconds(result.remainingMillis)
                                 }
                             }
                         }
@@ -179,5 +182,3 @@ fun Friction.Dialog() {
     )
 }
 
-private const val MAX_FAILURES = 5
-private const val LOCK_SECONDS = 30

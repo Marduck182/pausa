@@ -2,6 +2,8 @@
 
 package app.pausa.ui.settings
 
+import app.pausa.ui.common.Switch
+import app.pausa.ui.common.NoticeDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,12 +21,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -81,6 +84,7 @@ fun ExceptionsScreen(
                             title = row.app.label,
                             trailing = {
                                 Switch(
+                                    modifier = Modifier.semantics { contentDescription = "Dejar pasar ${row.app.label}" },
                                     checked = row.allowed,
                                     onCheckedChange = { allow ->
                                         // Letting an app through weakens the protection, so it takes a pause; removing one does not.
@@ -102,5 +106,7 @@ fun ExceptionsScreen(
             }
         }
     }
+    val notice by viewModel.notice.collectAsStateWithLifecycle()
+    NoticeDialog(notice, viewModel::dismissNotice)
     friction.Dialog()
 }

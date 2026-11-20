@@ -14,7 +14,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import app.pausa.domain.usecase.RuleLockChecker
 import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Singleton
 
 @Module
@@ -47,7 +50,23 @@ object AppModule {
     @Singleton
     fun ruleEngine(): RuleEngine = RuleEngine()
 
-    /** One injectable clock, so anything time-dependent can be tested with a fixed one. */
+    /**
+     * One injectable clock, so anything time-dependent can be tested with a fixed one. It asks for the phone's zone
+     * every time instead of keeping the one from when it was created: the guard lives for days, and "today" must
+     * change when the person travels or the zone changes.
+     */
     @Provides
-    fun clock(): Clock = Clock.systemDefaultZone()
+    fun clock(): Clock = object : Clock() {
+        override fun getZone(): ZoneId = ZoneId.systemDefault()
+        override fun withZone(zone: ZoneId): Clock = system(zone)
+        override fun instant(): Instant = Instant.now()
+    }
+
+    @Provides
+    fun ruleLockChecker(
+        rules: RuleRepository,
+        usage: UsageRepository,
+        settings: SettingsRepository,
+        clock: Clock,
+    ): RuleLockChecker = RuleLockChecker(rules, usage, settings, clock)
 }

@@ -1,16 +1,19 @@
 package app.pausa.enforcement
 
+import app.pausa.domain.model.BlockExit
 import android.accessibilityservice.AccessibilityService
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
+import android.util.Log
 import android.os.Looper
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
+import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat
 import app.pausa.domain.enforcement.EnforcementAction
 import app.pausa.domain.enforcement.EnforcementCore
@@ -26,7 +29,8 @@ import app.pausa.domain.model.FeatureSignatures
 import app.pausa.domain.model.InterventionEvent
 import app.pausa.domain.model.InterventionOutcome
 import app.pausa.domain.model.NodeSnapshot
-import app.pausa.domain.model.TemporaryAllow
+import app.pausa.domain.model.SessionCheckpoint
+import app.pausa.domain.model.SessionRecovery
 import app.pausa.domain.repository.RuleRepository
 import app.pausa.domain.repository.SettingsRepository
 import app.pausa.domain.repository.StatsRepository
@@ -34,17 +38,20 @@ import app.pausa.domain.repository.UsageRepository
 import app.pausa.ui.common.BlockText
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.Clock
-import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,7 +78,12 @@ class GuardAccessibilityService : AccessibilityService() {
     @Inject lateinit var clock: Clock
 
     private val core = EnforcementCore()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    // An exception nobody caught would end the whole process, and with it the guard. It is logged instead; the jobs
+    // that must keep running (below) also retry on their own.
+    private val scope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Main.immediate +
+            CoroutineExceptionHandler { _, e -> Log.e(TAG, "Unexpected failure in the guard", e) },
+    )
     private val mainHandler = Handler(Looper.getMainLooper())
     private lateinit var overlay: OverlayController
 
@@ -80,6 +92,9 @@ class GuardAccessibilityService : AccessibilityService() {
     private var scanScheduled = false
     private var reconcileScheduled = false
     private val reconcileReading = AtomicBoolean(false)
+    private var lastCheckpointAt = 0L
+    private var lastSystemPackagesAt = SystemClock.elapsedRealtime()
+    private var checkpointSaved = false
 
     /** When to believe a reading of the windows (see its notes: the old app lingers on screen after going home). */
     private val reconciler = ForegroundReconciler()
@@ -103,27 +118,51 @@ class GuardAccessibilityService : AccessibilityService() {
         core.acceptingEvents = false
         core.sessionListener = ::storeSession
         scope.launch {
-            core.rules = ruleRepository.getRules()
-            val today = LocalDate.now(clock)
-            core.restoreUsage(today, usageRepository.totalsForDay(today.toEpochDay()))
-            usageRepository.purgeBefore(today.minusDays(RETENTION_DAYS).toEpochDay())
+            // Everything the decision depends on is read before anything is enforced: with a focus session running or
+            // an exception set, the first window event must already know about them. If storage fails the read is
+            // retried, because giving up would leave the guard switched on but never enforcing.
+            retrying("initial load") {
+                core.rules = ruleRepository.getRules()
+                val settings = settingsRepository.settings.first()
+                appSettings = settings
+                core.exceptions = settings.exceptions
+                core.patternAvailable = settings.patternEnabled
+                core.temporaryAllows = settingsRepository.temporaryAllows.first()
+                core.focus = settingsRepository.focus.first()
+                recoverInterruptedSession()
+                val today = LocalDate.now(clock)
+                core.restoreUsage(today, usageRepository.totalsForDay(today.toEpochDay()))
+            }
+
+            // Housekeeping must never hold up enforcement or take it down with it.
+            launch {
+                try {
+                    val cutoff = LocalDate.now(clock)
+                    usageRepository.purgeBefore(cutoff.minusDays(RETENTION_DAYS).toEpochDay())
+                    statsRepository.purgeBefore(cutoff.minusDays(EVENT_RETENTION_DAYS).toEpochDay())
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not purge old sessions", e)
+                }
+            }
 
             launch {
-                ruleRepository.observeRules().collect {
+                keepCollecting("rules", ruleRepository.observeRules()) {
                     core.rules = it
                     updateContentWatching()
                 }
             }
             launch {
-                settingsRepository.settings.collect {
+                keepCollecting("settings", settingsRepository.settings) {
                     appSettings = it
                     core.exceptions = it.exceptions
                     core.patternAvailable = it.patternEnabled
                 }
             }
-            launch { settingsRepository.temporaryAllows.collect { core.temporaryAllows = it } }
+            launch { keepCollecting("temporary passes", settingsRepository.temporaryAllows) { core.temporaryAllows = it } }
             launch {
-                settingsRepository.focus.collect { focus ->
+                keepCollecting("focus", settingsRepository.focus) { focus ->
                     core.focus = focus
                     updateContentWatching()
                     // A focus session that starts now should not wait for the next check to take effect.
@@ -132,12 +171,21 @@ class GuardAccessibilityService : AccessibilityService() {
             }
 
             // A schedule can start, or a daily limit run out, while an app is open. The wait shrinks as a limit
-            // gets close, so the block lands on the minute.
+            // gets close, so the block lands on the minute. One failed check must not end the loop.
             while (isActive) {
-                delay(core.nextCheckDelayMillis(now()))
-                if (!overlay.isShowing) {
-                    reconcileForeground()
-                    handle(core.onTick(now()))
+                try {
+                    delay(core.nextCheckDelayMillis(now()))
+                    if (!overlay.isShowing) {
+                        reconcileForeground()
+                        handle(core.onTick(now()))
+                    }
+                    refreshSystemPackagesIfDue()
+                    writeCheckpointIfDue()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "Periodic check failed", e)
+                    delay(RETRY_MILLIS)
                 }
             }
         }
@@ -164,11 +212,11 @@ class GuardAccessibilityService : AccessibilityService() {
             return
         }
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-        logForLab(event, packageName)
+        if (BuildConfig.DEBUG) logForLab(event, packageName)
         reconciler.onWindowEvent(packageName in core.systemPackages.home, SystemClock.uptimeMillis())
 
         if (packageName in LabConfig.blockedPackages.value) {
-            showBlock(packageName, "Prueba del laboratorio: esta app está bloqueada.", featureId = null, allowTemporarily = null)
+            showBlock(packageName, "Prueba del laboratorio: esta app está bloqueada.", featureId = null)
             return
         }
 
@@ -202,6 +250,56 @@ class GuardAccessibilityService : AccessibilityService() {
 
     private fun now(): ZonedDateTime = ZonedDateTime.now(clock)
 
+    // --- Not dying quietly ---------------------------------------------------------------------------------------
+
+    /** Runs [block] until it succeeds, waiting between attempts. Cancellation (the service stopping) is let through. */
+    private suspend fun retrying(what: String, block: suspend () -> Unit) {
+        while (true) {
+            try {
+                block()
+                return
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed: $what; trying again", e)
+                LabLog.add("Falló: $what; se reintenta")
+                delay(RETRY_MILLIS)
+            }
+        }
+    }
+
+    /**
+     * Applies every value of [flow] and, if the flow or the handler fails, starts it again after a pause. A single
+     * bad emission must not leave the guard working with stale rules for the rest of the day.
+     */
+    private suspend fun <T> keepCollecting(what: String, flow: Flow<T>, apply: (T) -> Unit) {
+        while (true) {
+            try {
+                flow.collect { apply(it) }
+                return
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed while following $what; following again", e)
+                LabLog.add("Falló al seguir $what; se reintenta")
+                delay(RETRY_MILLIS)
+            }
+        }
+    }
+
+    /**
+     * Shows a screen over the app. If the system refuses (it can, for instance while the screen is being
+     * rebuilt), the person is taken home instead: a block that does not appear must still keep the app closed.
+     */
+    private fun present(packageName: String, onBack: () -> Unit, content: @Composable () -> Unit): Boolean {
+        val shown = overlay.show(packageName, onBack, content)
+        if (!shown) {
+            Log.w(TAG, "Overlay for $packageName could not be shown; going home instead")
+            goHome()
+        }
+        return shown
+    }
+
     // --- Acting on decisions -----------------------------------------------------------------------------------
 
     private fun handle(action: EnforcementAction) {
@@ -210,13 +308,13 @@ class GuardAccessibilityService : AccessibilityService() {
             is EnforcementAction.ShowIntervention -> showIntervention(action)
             is EnforcementAction.ShowPatternLock -> showPatternLock(action.packageName)
             is EnforcementAction.ShowBlock -> {
-                record(action.packageName, InterventionOutcome.BLOCKED)
-                showBlock(
+                val shown = showBlock(
                     packageName = action.packageName,
                     message = BlockText.describe(action.block, now(), action.featureId),
                     featureId = action.featureId,
-                    allowTemporarily = action.takeIf(::canAllowTemporarily)?.let { { allowTemporarily(it) } },
                 )
+                // Only a block the person actually saw counts in the statistics.
+                if (shown) record(action.packageName, InterventionOutcome.BLOCKED)
             }
         }
     }
@@ -227,7 +325,7 @@ class GuardAccessibilityService : AccessibilityService() {
             record(packageName, InterventionOutcome.CANCELLED)
             leave(featureId = null)
         }
-        overlay.show(packageName, onBack = cancel) {
+        present(packageName, onBack = cancel) {
             PatternLockContent(
                 packageName = packageName,
                 appLabel = labelFor(packageName, null),
@@ -238,13 +336,14 @@ class GuardAccessibilityService : AccessibilityService() {
                     handle(core.onPatternPassed(packageName, now()))
                 },
                 onCancel = cancel,
+                themeMode = appSettings.themeMode,
             )
         }
     }
 
     private fun showIntervention(action: EnforcementAction.ShowIntervention) {
         val packageName = action.packageName
-        overlay.show(packageName, onBack = { cancelPause(action) }) {
+        present(packageName, onBack = { cancelPause(action) }) {
             InterventionContent(
                 packageName = packageName,
                 appLabel = labelFor(packageName, action.featureId),
@@ -256,6 +355,7 @@ class GuardAccessibilityService : AccessibilityService() {
                     core.onInterventionPassed(packageName, now())
                     overlay.hide()
                 },
+                themeMode = appSettings.themeMode,
             )
         }
     }
@@ -265,43 +365,22 @@ class GuardAccessibilityService : AccessibilityService() {
         leave(action.featureId)
     }
 
-    private fun showBlock(packageName: String, message: String, featureId: String?, allowTemporarily: (() -> Unit)?) {
+    private fun showBlock(packageName: String, message: String, featureId: String?): Boolean {
         val dismiss = { leave(featureId) }
-        overlay.show(packageName, onBack = dismiss) {
+        return present(packageName, onBack = dismiss) {
             BlockContent(
                 packageName = packageName,
                 title = if (featureId == null) "${labelFor(packageName, null)} está bloqueada" else "${labelFor(packageName, featureId)}: bloqueado",
                 message = message,
                 dismissLabel = if (featureId == null) "Volver al inicio" else "Ir a Inicio",
                 onDismiss = dismiss,
-                temporaryAllowMinutes = TEMPORARY_ALLOW.toMinutes().toInt().takeIf { allowTemporarily != null },
-                waitSeconds = appSettings.cooldownSeconds,
-                onAllowTemporarily = allowTemporarily ?: {},
+                // A pass for one app from here is gone: the way to rest is a break, chosen in advance on the home screen.
+                temporaryAllowMinutes = null,
+                waitSeconds = 0,
+                onAllowTemporarily = {},
+                themeMode = appSettings.themeMode,
             )
         }
-    }
-
-    /**
-     * A temporary pass is a deliberate act, so it is only offered when it is not protected: never during a focus
-     * session or for a hard-mode rule, and not at all if the user set a PIN (the PIN cannot be typed safely into
-     * a window drawn over another app; with a PIN the pass is asked for inside Pausa).
-     */
-    private fun canAllowTemporarily(action: EnforcementAction.ShowBlock): Boolean {
-        if (appSettings.pinEnabled || action.block.reason == BlockReason.FOCUS) return false
-        val rule = core.rules.firstOrNull { it.id == action.block.ruleId }
-        return rule != null && !rule.hardMode
-    }
-
-    private fun allowTemporarily(action: EnforcementAction.ShowBlock) {
-        val packageName = action.packageName
-        val allow = TemporaryAllow(packageName, now().toInstant().plus(TEMPORARY_ALLOW))
-        // Applied right away so the app is not blocked again before the stored copy comes back through the flow.
-        core.temporaryAllows = core.temporaryAllows + allow
-        scope.launch { withContext(NonCancellable) { settingsRepository.addTemporaryAllow(allow) } }
-        record(packageName, InterventionOutcome.TEMP_ALLOW)
-        overlay.hide()
-        // The block had forgotten the app; seeing it again starts a session that the pass now lets through.
-        if (action.featureId == null) handle(core.onWindowChanged(packageName, now()))
     }
 
     /**
@@ -315,7 +394,7 @@ class GuardAccessibilityService : AccessibilityService() {
         // First, so the app is the active window again: only then can its screen be read and its tab pressed.
         overlay.hide()
         if (featureId == null) {
-            goHome()
+            exitApp()
             return
         }
         val packageName = core.currentPackage
@@ -378,6 +457,28 @@ class GuardAccessibilityService : AccessibilityService() {
         return if (featureId == null) app else "${FeatureCatalog.displayName(featureId)} de $app"
     }
 
+    /**
+     * Takes the person out of a blocked app: to the home screen, or (if they chose it in Settings) only one step back.
+     * Back is not enough on its own: from a screen deep inside the app it only moves to the previous screen and the app
+     * stays usable, so a moment later, if the same app is still in front, the person is sent home after all.
+     */
+    private fun exitApp() {
+        val packageName = core.currentPackage
+        if (appSettings.blockExit != BlockExit.BACK || packageName == null) {
+            goHome()
+            return
+        }
+        performGlobalAction(GLOBAL_ACTION_BACK)
+        scope.launch {
+            delay(BACK_CHECK_MILLIS)
+            val stillThere = withContext(Dispatchers.Default) { rootInActiveWindow?.packageName?.toString() == packageName }
+            if (stillThere) {
+                LabLog.add("Atrás no cerró $packageName: se va al inicio")
+                goHome()
+            }
+        }
+    }
+
     fun goHome() {
         performGlobalAction(GLOBAL_ACTION_HOME)
     }
@@ -394,6 +495,7 @@ class GuardAccessibilityService : AccessibilityService() {
                 temporaryAllowMinutes = null,
                 waitSeconds = 0,
                 onAllowTemporarily = {},
+                themeMode = appSettings.themeMode,
             )
         }
     }
@@ -403,7 +505,61 @@ class GuardAccessibilityService : AccessibilityService() {
     /** Stores one finished session. It survives the service being stopped right after: it is the last write. */
     private fun storeSession(session: CompletedSession) {
         val epochDay = session.start.atZone(clock.zone).toLocalDate().toEpochDay()
-        scope.launch { withContext(NonCancellable) { usageRepository.record(session, epochDay) } }
+        scope.launch {
+            withContext(NonCancellable) {
+                usageRepository.record(session, epochDay)
+                // Now stored for real: the note about it would only count it a second time.
+                if (checkpointSaved) {
+                    checkpointSaved = false
+                    runCatching { settingsRepository.saveCheckpoint(null) }
+                }
+            }
+        }
+    }
+
+    // --- Surviving being killed ----------------------------------------------------------------------------------
+
+    /** A note found at start means the last process died with a session open: its time is stored now. */
+    private suspend fun recoverInterruptedSession() {
+        val note = settingsRepository.checkpoint() ?: return
+        val pieces = SessionRecovery.recover(note, clock.zone)
+        pieces.forEach { piece ->
+            usageRepository.record(piece, piece.start.atZone(clock.zone).toLocalDate().toEpochDay())
+        }
+        settingsRepository.saveCheckpoint(null)
+        Log.i(TAG, "Recovered ${pieces.size} piece(s) of a session cut short for ${note.packageName}")
+    }
+
+    /**
+     * Which apps are the launcher, the keyboard or the phone can change while the guard runs (a new launcher or
+     * keyboard is installed). Read again now and then, off the main thread, so those apps are never mistaken for
+     * ones to control.
+     */
+    private suspend fun refreshSystemPackagesIfDue() {
+        val tick = SystemClock.elapsedRealtime()
+        if (tick - lastSystemPackagesAt < SYSTEM_PACKAGES_REFRESH_MILLIS) return
+        lastSystemPackagesAt = tick
+        core.systemPackages = withContext(Dispatchers.Default) { systemPackages.resolve() }
+    }
+
+    /** At most every half minute: often enough to lose little, rarely enough not to wear the storage. */
+    private fun writeCheckpointIfDue() {
+        val tick = SystemClock.elapsedRealtime()
+        if (tick - lastCheckpointAt < CHECKPOINT_MILLIS) return
+        lastCheckpointAt = tick
+        val active = core.activeSession
+        if (active == null && !checkpointSaved) return
+        val note = active?.let { (pkg, start) -> SessionCheckpoint(pkg, start.toEpochMilli(), clock.millis()) }
+        scope.launch {
+            try {
+                settingsRepository.saveCheckpoint(note)
+                checkpointSaved = note != null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not write the session note", e)
+            }
+        }
     }
 
     /** Remembers what the user did in front of a restriction: a package, a time and a short code. */
@@ -600,6 +756,18 @@ class GuardAccessibilityService : AccessibilityService() {
     companion object {
         /** Raw sessions older than this are deleted; only daily summaries are kept longer. */
         private const val RETENTION_DAYS = 30L
+
+        /** Reactions (blocked, cancelled, allowed) are tiny, so they are kept longer than raw sessions. */
+        private const val EVENT_RETENTION_DAYS = 180L
+        private const val TAG = "PausaGuard"
+
+        /** Pause before trying again after a storage or flow failure. */
+        private const val RETRY_MILLIS = 2_000L
+
+        /** Time for an app to leave the screen after Back, before checking whether it is still there. */
+        private const val BACK_CHECK_MILLIS = 450L
+        private const val CHECKPOINT_MILLIS = 30_000L
+        private const val SYSTEM_PACKAGES_REFRESH_MILLIS = 10 * 60_000L
         private const val MAX_NODES = 400
         private const val MAX_SCAN_NODES = 600
         private const val MAX_LABEL = 16
@@ -614,8 +782,6 @@ class GuardAccessibilityService : AccessibilityService() {
         private const val RECONCILE_DELAY_MILLIS = 150L
         private const val RECONCILE_CONFIRM_MILLIS = 250L
 
-        /** How long a temporary pass lasts. */
-        private val TEMPORARY_ALLOW: Duration = Duration.ofMinutes(10)
 
         /** The running service, if the user has it turned on. UI code reaches the service through this. */
         @Volatile

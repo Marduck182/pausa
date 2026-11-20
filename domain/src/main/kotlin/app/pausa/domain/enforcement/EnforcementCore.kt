@@ -121,6 +121,10 @@ class EnforcementCore(
 
     private data class InFlight(val packageName: String, val start: Instant)
 
+    /** The app being timed right now and since when, or null. The guard writes it down now and then (see SessionCheckpoint). */
+    val activeSession: Pair<String, Instant>?
+        get() = inFlight?.let { it.packageName to it.start }
+
     /** Loads what was already used earlier today (before a restart). Also lets events through again. */
     fun restoreUsage(day: LocalDate, totals: Map<String, PackageUsage>) {
         if (baseDay == null || baseDay == day) {

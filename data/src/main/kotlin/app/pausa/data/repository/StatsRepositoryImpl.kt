@@ -37,6 +37,8 @@ class StatsRepositoryImpl(
         },
     )
 
+    override suspend fun purgeBefore(epochDay: Long) = events.deleteBefore(epochDay)
+
     override suspend fun earliestActiveDay(): Long? =
         listOfNotNull(events.earliestDay(), usage.earliestDay()).minOrNull()
 }

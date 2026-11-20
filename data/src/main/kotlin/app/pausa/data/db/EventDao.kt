@@ -12,6 +12,9 @@ interface EventDao {
     @Query("SELECT * FROM intervention_event WHERE epochDay >= :fromEpochDay ORDER BY timestampMillis")
     suspend fun since(fromEpochDay: Long): List<InterventionEventEntity>
 
+    @Query("DELETE FROM intervention_event WHERE epochDay < :epochDay")
+    suspend fun deleteBefore(epochDay: Long)
+
     @Query("SELECT MIN(epochDay) FROM intervention_event")
     suspend fun earliestDay(): Long?
 }

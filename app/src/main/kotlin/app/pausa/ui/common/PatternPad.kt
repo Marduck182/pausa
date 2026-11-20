@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import app.pausa.domain.security.AttemptResult
 import app.pausa.domain.security.Pattern
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -128,8 +129,8 @@ fun PatternPad(
 }
 
 /**
- * Asks for the pattern and checks it with [verify]. Wrong attempts are counted: after five, drawing is paused for
- * thirty seconds. Used on the lock screen over an app and in the dialogs that ask for the current pattern.
+ * Asks for the pattern and checks it with [verify]. Wrong attempts are counted for the whole process (see
+ * [Attempts]): after five, drawing is paused, for longer each time. Used on the lock screen over an app and in the dialogs that ask for the current pattern.
  */
 @Composable
 fun PatternChallenge(
@@ -139,8 +140,9 @@ fun PatternChallenge(
     idleHint: String = "Dibuja tu patrón.",
 ) {
     var wrong by remember { mutableStateOf(false) }
-    var failures by remember { mutableIntStateOf(0) }
-    var lockedSeconds by remember { mutableIntStateOf(0) }
+    // The wait may already be running from an earlier screen: the count is not this one's to reset.
+    var lockedSeconds by remember { mutableIntStateOf(Attempts.seconds(Attempts.pattern.remainingLockMillis(Attempts.now()))) }
+    var checking by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(lockedSeconds > 0) {
@@ -153,21 +155,28 @@ fun PatternChallenge(
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         PatternPad(
             onPattern = { dots ->
-                scope.launch {
-                    if (verify(dots)) {
-                        onVerified()
-                    } else {
-                        wrong = true
-                        failures++
-                        if (failures >= MAX_FAILURES) {
-                            failures = 0
-                            lockedSeconds = LOCK_SECONDS
+                // A second stroke drawn while the first is being checked is ignored, not checked as another try.
+                if (!checking) {
+                    checking = true
+                    scope.launch {
+                        val result = try {
+                            Attempts.pattern.attempt(Attempts::now) { verify(dots) }
+                        } finally {
+                            checking = false
+                        }
+                        when (result) {
+                            AttemptResult.Success -> onVerified()
+                            is AttemptResult.Wrong -> {
+                                wrong = true
+                                if (result.lockedForMillis > 0) lockedSeconds = Attempts.seconds(result.lockedForMillis)
+                            }
+                            is AttemptResult.Locked -> lockedSeconds = Attempts.seconds(result.remainingMillis)
                         }
                     }
                 }
             },
             isError = wrong,
-            enabled = lockedSeconds == 0,
+            enabled = lockedSeconds == 0 && !checking,
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
@@ -186,5 +195,3 @@ fun PatternChallenge(
 private const val GRID = 3
 private const val HIT_FRACTION = 0.3f
 private const val CLEAR_MILLIS = 500L
-private const val MAX_FAILURES = 5
-private const val LOCK_SECONDS = 30

@@ -1,0 +1,194 @@
+/* Diseño D, índice técnico: negro puro, rejilla de 1 px con cruces, nodos cuadrados con conectores, acento azul hielo.
+   El fondo (#d-bg) es fijo y ocupa toda la página; las pantallas se desplazan por encima. Todo es de esquinas cuadradas
+   salvo la ficha PRIME de la tira superior, que es la única redondeada (3 px). */
+
+body[data-design="d"] { background: #000; --d-acc: #AFDDFF; --d-out: cubic-bezier(0.16, 1, 0.3, 1); font-family: "Manrope", "Space Grotesk", system-ui, sans-serif; }
+body[data-design="d"] .top { background: oklch(0 0 0 / 0.86); }
+body[data-design="d"] main { position: relative; z-index: 1; }
+
+@keyframes dFadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes dFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dSlideL { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: none; } }
+@keyframes dSlideR { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+@keyframes dScale { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes dGridV { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
+@keyframes dGridH { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
+.d-fade-up, .d-fade-in, .d-slide-l, .d-slide-r, .d-scale, .d-grid-v, .d-grid-h { opacity: 0; animation-fill-mode: forwards; animation-timing-function: var(--d-out, cubic-bezier(0.16, 1, 0.3, 1)); }
+.d-fade-up { animation-name: dFadeUp; animation-duration: 0.9s; }
+.d-fade-in { animation-name: dFadeIn; animation-duration: 0.8s; }
+.d-slide-l { animation-name: dSlideL; animation-duration: 0.8s; }
+.d-slide-r { animation-name: dSlideR; animation-duration: 0.8s; }
+.d-scale { animation-name: dScale; animation-duration: 0.7s; }
+.d-grid-v { transform-origin: top; animation-name: dGridV; animation-duration: 1.2s; }
+.d-grid-h { transform-origin: left; animation-name: dGridH; animation-duration: 1.2s; }
+
+/* ---------- fondo fijo ---------- */
+
+#d-bg { position: fixed; inset: 72px 0 0 0; z-index: 0; background: #000; pointer-events: none; overflow: hidden; --d-out: cubic-bezier(0.16, 1, 0.3, 1); }
+#d-bg[hidden] { display: none; }
+#d-bg video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#d-bg .scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.35); }
+.d-vline { position: absolute; top: 0; height: 100%; width: 1px; background: rgba(255, 255, 255, 0.04); }
+.d-hline { position: absolute; left: 0; width: 100%; height: 1px; background: rgba(255, 255, 255, 0.04); }
+.d-plus { position: absolute; }
+.d-plus i { position: absolute; background: rgba(255, 255, 255, 0.7); transform: translate(-50%, -50%); }
+.d-plus i:first-child { width: 10px; height: 1px; }
+.d-plus i:last-child { width: 1px; height: 10px; }
+.d-nodes { position: absolute; inset: 0; display: none; }
+@media (min-width: 768px) { .d-nodes { display: block; } }
+.d-sq { position: absolute; width: 80px; height: 80px; border: 1px solid rgba(255, 255, 255, 0.8); }
+@media (min-width: 1024px) { .d-sq { width: 100px; height: 100px; } }
+.d-lab { position: absolute; font-family: "Manrope", sans-serif; }
+.d-lab span { display: block; color: #fff; font-size: 13px; line-height: 15.6px; white-space: nowrap; }
+.d-lab p { margin: 4px 0 0; color: rgba(255, 255, 255, 0.5); font-size: 11px; line-height: 14px; }
+.d-conn { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* ---------- portada ---------- */
+
+.d-hero { position: relative; width: 100%; height: calc(100vh - 72px); min-height: 640px; overflow: hidden; font-family: "Manrope", sans-serif; }
+.d-nav { position: absolute; top: 0; left: 0; width: 100%; display: flex; align-items: center; padding: 20px 20px; }
+@media (min-width: 768px) { .d-nav { padding: 27px 35px; } }
+.d-nav .left { display: flex; align-items: center; gap: 40px; }
+.d-word { font-family: "Space Grotesk", sans-serif; color: #fff; font-size: 18px; line-height: 21px; white-space: nowrap; }
+@media (min-width: 768px) { .d-word { font-size: 21px; } }
+.d-links { display: none; align-items: center; gap: 40px; }
+.d-strip { display: none; align-items: center; gap: 12px; margin-left: auto; }
+@media (min-width: 1024px) { .d-links, .d-strip { display: flex; } }
+.d-link { display: flex; align-items: center; gap: 3px; font-size: 13px; line-height: 15.6px; color: #fff; }
+.d-link b { font-weight: 400; color: rgb(175 221 255 / 0.8); }
+.d-link span { cursor: pointer; transition: color 0.2s; }
+.d-link span:hover { color: var(--d-acc); }
+.d-strip span { font-size: 13px; line-height: 15.6px; color: #fff; }
+.d-strip .acc { color: var(--d-acc); }
+.d-strip .gap { margin-left: 20px; }
+.d-chip { background: var(--d-acc); color: #000 !important; border-radius: 3px; padding: 2px 5px; }
+.d-h1 { position: absolute; margin: 0; top: 140px; left: 20px; max-width: 300px; font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 32px; line-height: 1em; color: #fff; }
+@media (min-width: 640px) { .d-h1 { top: 160px; font-size: 48px; max-width: 420px; } }
+@media (min-width: 768px) { .d-h1 { top: 178px; left: 35px; font-size: 68px; max-width: 554px; } }
+.d-bottom { position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 20px; }
+@media (min-width: 768px) { .d-bottom { left: 35px; right: 35px; bottom: 35px; flex-direction: row; align-items: flex-end; gap: 0; } }
+.d-cta { background: var(--d-acc); padding: 10px 16px; display: flex; align-items: center; gap: 10px; transition: background 0.2s; color: #000; }
+.d-cta:hover { background: #c8e8ff; }
+.d-cta .star { font-size: 16px; line-height: 1; }
+.d-cta span:last-child { font-size: 12px; line-height: 15.6px; text-transform: uppercase; letter-spacing: 0.025em; }
+@media (min-width: 768px) { .d-cta { padding: 12px 20px; } .d-cta span:last-child { font-size: 13px; } }
+.d-card { position: relative; max-width: 280px; display: none; }
+@media (min-width: 640px) { .d-card { display: block; } }
+.d-card .badge-d { display: inline-block; margin-bottom: 10px; background: var(--d-acc); color: #000; font-size: 13px; line-height: 15.6px; padding: 2px 6px; }
+.d-card .body { position: relative; padding: 20px; }
+.d-card svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.d-card p { position: relative; margin: 0 0 18px; color: #fff; font-size: 13px; line-height: 18px; }
+.d-card a { position: relative; color: var(--d-acc); font-size: 13px; line-height: 15.6px; cursor: pointer; }
+.d-card a:hover { text-decoration: underline; }
+.d-ask { position: absolute; top: 84px; right: 35px; }
+.d-ask.btn-small { background: transparent; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5); border-radius: 0; color: #fff; }
+
+/* ---------- pantallas de Pausa en estilo técnico ---------- */
+
+.phone.d { --bg: #000; --ink: #fff; --ink-2: rgba(255, 255, 255, 0.78); --ink-3: rgba(255, 255, 255, 0.6); --primary: #AFDDFF; --on-primary: #000; --line: rgba(255, 255, 255, 0.1);
+  border-radius: 28px; font-family: "Manrope", sans-serif; background: #000;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 25% 100%, 100% 33.33%; }
+.phone.d .status span:last-child { color: var(--ink-2); }
+.phone.d .status-pill { background: transparent; box-shadow: none; padding: 0; min-height: 0; color: var(--d-acc); font-size: 13px; }
+.phone.d .dot { display: none; }
+.phone.d .dock { background: #000; border-radius: 0; left: 0; right: 0; bottom: 0; padding: 0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); backdrop-filter: none; }
+.phone.d .tab { border-radius: 0; min-height: 60px; font-size: 0.6875rem; letter-spacing: 0.02em; text-transform: uppercase; }
+.phone.d .tab[aria-current="page"] { background: transparent; color: var(--d-acc); box-shadow: inset 0 2px 0 var(--d-acc); }
+.phone.d .bar h3, .phone.d .brand { font-family: "Space Grotesk", sans-serif; font-weight: 400; }
+.phone.d .brand svg { color: var(--d-acc); }
+
+.d-frame { width: 112px; height: 112px; border: 1px solid rgba(255, 255, 255, 0.8); position: relative; display: grid; place-items: center; flex: none; }
+.d-frame::before, .d-frame::after { content: ""; position: absolute; background: rgba(255, 255, 255, 0.7); }
+.d-frame::before { width: 10px; height: 1px; top: -1px; left: -5px; }
+.d-frame::after { width: 1px; height: 10px; top: -5px; left: -1px; }
+.d-frame strong { font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 2.75rem; letter-spacing: -0.03em; }
+.d-hint { margin: 0; font-size: 13px; line-height: 18px; color: var(--ink-2); }
+.d-title { margin: 0; font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 2.25rem; line-height: 1; letter-spacing: -0.02em; }
+.d-tag { font-size: 13px; line-height: 15.6px; color: var(--d-acc); }
+.d-tag.mute { color: var(--ink-3); }
+.d-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 52px; padding: 0 20px; background: var(--d-acc); color: #000; font-size: 13px; text-transform: uppercase; letter-spacing: 0.025em; font-weight: 500; transition: background 0.2s; }
+.d-btn:hover:not(:disabled) { background: #c8e8ff; }
+.d-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.d-btn.ghost { background: transparent; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5); }
+.d-btn.ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+.d-chips { display: grid; grid-template-columns: repeat(4, 1fr); }
+.d-chips button { min-height: 44px; font-size: 13px; color: var(--ink-3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); margin-left: -1px; transition: color 0.2s, background 0.2s; }
+.d-chips button:first-child { margin-left: 0; }
+.d-chips button[aria-pressed="true"] { background: var(--d-acc); color: #000; box-shadow: none; }
+.d-list { display: flex; flex-direction: column; }
+.d-item { display: grid; grid-template-columns: 44px 1fr auto; gap: 14px; align-items: center; padding: 14px 0; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1); }
+.d-item:last-child { box-shadow: none; }
+.d-item .ico { width: 44px; height: 44px; display: grid; place-items: center; font-weight: 700; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5); }
+.d-item .ico svg { width: 18px; height: 18px; fill: #fff; }
+.d-item b { font-weight: 500; font-size: 15px; display: block; }
+.d-item small { font-size: 13px; color: var(--ink-3); }
+.d-sw { width: 48px; height: 26px; position: relative; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5); flex: none; transition: background 0.2s; }
+.d-sw::after { content: ""; position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; background: rgba(255, 255, 255, 0.7); transition: transform 0.2s var(--d-out), background 0.2s; }
+.d-sw[aria-checked="true"] { background: var(--d-acc); box-shadow: none; }
+.d-sw[aria-checked="true"]::after { transform: translateX(22px); background: #000; }
+.d-fact { position: relative; padding: 18px; }
+.d-fact svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.d-fact p { position: relative; margin: 0 0 12px; font-size: 13px; line-height: 18px; }
+.d-fact a { position: relative; color: var(--d-acc); font-size: 13px; }
+.d-over { margin: auto 0; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.d-over h3 { margin: 0; font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 2rem; line-height: 1.02; letter-spacing: -0.02em; }
+.phone.d .actions { gap: 10px; }
+.phone.d .screen { gap: 20px; }
+.d-bars { display: flex; flex-direction: column; gap: 14px; }
+.d-bars div { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 13px; }
+.d-bars i { grid-column: 1 / -1; height: 1px; background: rgba(255, 255, 255, 0.2); position: relative; }
+.d-bars i::after { content: ""; position: absolute; left: 0; top: -1px; height: 3px; width: var(--w); background: var(--d-acc); }
+.d-plusrow { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+  .d-fade-up, .d-fade-in, .d-slide-l, .d-slide-r, .d-scale, .d-grid-v, .d-grid-h { animation-duration: 0.01ms; animation-delay: 0ms !important; }
+}
+
+/* ---------- C v2: cápsulas de cristal sobre los divs y el fondo del D ---------- */
+
+.phone.d, .study.d2 { --d-acc: #AFDDFF; --d-out: cubic-bezier(0.16, 1, 0.3, 1); }
+
+.phone.d.c2 { background-image: none; background: #000; }
+.phone.d.c2 .screen { z-index: 1; }
+.app-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.app-bg video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; }
+.app-bg .scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); }
+.app-bg .grid { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px); background-size: 25% 100%, 100% 33.33%; }
+.app-bg .plus { position: absolute; width: 10px; height: 10px; transform: translate(-50%, -50%); }
+.app-bg .plus::before, .app-bg .plus::after { content: ""; position: absolute; background: rgba(255, 255, 255, 0.7); }
+.app-bg .plus::before { left: 0; top: 4.5px; width: 10px; height: 1px; }
+.app-bg .plus::after { left: 4.5px; top: 0; width: 1px; height: 10px; }
+
+.c2 .gb-label { padding: 0 64px 0 92px; flex-direction: column; justify-content: center; gap: 0; line-height: 1.2; }
+.c2 .gb-label small { white-space: nowrap; }
+.c2 .gb-chev { color: #fff; }
+.c2 .gb-chev::before { background: rgba(255, 255, 255, 0.35); }
+.c2 .c-menu { background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45); border-radius: 0; padding: 0; margin-top: -6px; backdrop-filter: none; }
+.c2 .c-menu button { border-radius: 0; color: #fff; min-height: 48px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.025em; }
+.c2 .c-menu button[aria-pressed="true"] { background: var(--d-acc); color: #000; font-weight: 500; }
+.c2 .g-hold::before { background: rgb(175 221 255 / 0.35); }
+.d-timeframe { width: 100%; height: 190px; border: 1px solid rgba(255, 255, 255, 0.8); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.d-timeframe::before, .d-timeframe::after { content: ""; position: absolute; background: rgba(255, 255, 255, 0.7); }
+.d-timeframe::before { width: 10px; height: 1px; top: -1px; left: -5px; }
+.d-timeframe::after { width: 1px; height: 10px; top: -5px; left: -1px; }
+.d-timeframe strong { font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 4rem; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.d-timeframe span { font-size: 13px; color: var(--ink-2); }
+.d-progress { height: 1px; background: rgba(255, 255, 255, 0.2); position: relative; }
+.d-progress::after { content: ""; position: absolute; left: 0; top: -1px; height: 3px; width: var(--w); background: var(--d-acc); }
+.d-breath { width: 190px; height: 190px; border: 1px solid rgba(255, 255, 255, 0.8); display: grid; place-items: center; align-self: center; transform: scale(var(--s, 0.86)); transition: transform 4s ease-in-out; position: relative; }
+.d-breath .word { text-align: center; transform: scale(calc(1 / var(--s, 0.86))); }
+.d-breath strong { display: block; font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 1.5rem; }
+.d-breath span { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.d-over .glassbtn { margin: 4px 0; }
+
+.study.d2 { background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); border-radius: 0; color: #fff; font-family: "Manrope", sans-serif; --d-acc: #AFDDFF; }
+.study.d2::before { display: none; }
+.study.d2 .app-bg { z-index: 0; }
+.study.d2 > .stage, .study.d2 > .controls { position: relative; z-index: 1; }
+.study.d2 .stage { position: relative; padding: 36px 24px; }
+.study.d2 .stage svg.chamfer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.study.d2 h2 { font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 1.5rem; letter-spacing: -0.02em; }
+.study.d2 label { text-transform: uppercase; letter-spacing: 0.025em; color: #fff; font-size: 12px; }
+.study.d2 input[type="range"] { accent-color: #AFDDFF; }
+.study.d2 .btn-small { background: transparent; border-radius: 0; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5); }
