@@ -2,6 +2,8 @@
 
 package app.pausa.ui.apps
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,9 +45,9 @@ fun PickAppScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Elige una app", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(R.string.pick_title), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.apps_back)) }
                 },
             )
         },
@@ -62,14 +64,14 @@ fun PickAppScreen(
                 onValueChange = viewModel::setQuery,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Buscar") },
+                placeholder = { Text(stringResource(R.string.pick_search)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             )
             when {
                 state.loading -> SkeletonRows(count = 8)
                 state.apps.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        if (state.query.isBlank()) "Ya controlas todas tus apps." else "Ninguna app se llama así.",
+                        stringResource(if (state.query.isBlank()) R.string.pick_all_controlled else R.string.pick_no_match),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

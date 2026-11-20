@@ -44,6 +44,12 @@ data class RawStats(
 
 data class AppUsageStat(val packageName: String, val millis: Long)
 
+/**
+ * How many times, today, the user tried to open an app: every opening that was let in plus every one Pausa stopped
+ * ([stopped], blocked or backed out of at the pause). A count of events, not a measurement of time.
+ */
+data class AppAttemptStat(val packageName: String, val attempts: Int, val stopped: Int)
+
 data class StatsSnapshot(
     /** Times, this week, the user did not get into an app: blocked at the door or backed out of a pause. */
     val attemptsAvoided: Int,
@@ -55,6 +61,8 @@ data class StatsSnapshot(
     val estimatedSavedMillis: Long,
     /** Use per app over the last seven days, most used first. */
     val usageByApp: List<AppUsageStat>,
+    /** Today's attempts to open each controlled app, most attempts first. */
+    val attemptsTodayByApp: List<AppAttemptStat> = emptyList(),
     /** Minutes of use per hour of the day over the last seven days (24 entries). */
     val minutesByHour: List<Int>,
     /** The hour with the most use, or null if there is none. */

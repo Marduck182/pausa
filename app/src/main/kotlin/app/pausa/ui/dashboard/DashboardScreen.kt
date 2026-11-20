@@ -2,6 +2,10 @@
 
 package app.pausa.ui.dashboard
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import app.pausa.BuildConfig
 import app.pausa.ui.common.GlassGhostAction
 import app.pausa.ui.common.AlertDialog
 import app.pausa.ui.common.prismBorder
@@ -107,9 +111,9 @@ fun DashboardScreen(
     val openAccessibility = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
     val endFocus = {
         friction.ask(
-            title = "¿Terminar la concentración?",
-            message = "Terminarla antes reinicia tu racha de días seguidos.",
-            confirmLabel = "Terminar",
+            title = friction.text(R.string.dash_end_focus_title),
+            message = friction.text(R.string.dash_end_focus_message),
+            confirmLabel = friction.text(R.string.dash_end_focus_confirm),
             onConfirmed = viewModel::endFocusEarly,
         )
     }
@@ -117,9 +121,9 @@ fun DashboardScreen(
     // A break is chosen in advance, so there is no wait. A PIN, if the person set one, is still asked: it is a way around the rules.
     val startBreak = { minutes: Int ->
         friction.ask(
-            title = "¿Tomar un descanso de $minutes min?",
-            message = "Tus apps se abrirán sin espera durante $minutes minutos. Las reglas estrictas y la concentración siguen.",
-            confirmLabel = "Descansar",
+            title = friction.text(R.string.dash_break_title, minutes),
+            message = friction.quantity(R.plurals.dash_break_message, minutes, minutes),
+            confirmLabel = friction.text(R.string.dash_break_confirm),
             wait = false,
             onConfirmed = { viewModel.startBreak(minutes) },
         )
@@ -236,7 +240,7 @@ private fun DetailsSection(
         }
     }
     Text(
-        "Tus datos se quedan en este teléfono. Pausa no tiene permiso de internet.",
+        stringResource(R.string.dash_privacy_line),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -275,9 +279,9 @@ private fun StatusHeader(serviceState: ServiceState, onFix: () -> Unit) {
             StatusDot(if (running) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
             Text(
                 when (serviceState) {
-                    ServiceState.Running -> "Activa"
-                    ServiceState.Off -> "Apagada"
-                    ServiceState.NotRunning -> "Sin respuesta"
+                    ServiceState.Running -> stringResource(R.string.dash_status_active)
+                    ServiceState.Off -> stringResource(R.string.dash_status_off)
+                    ServiceState.NotRunning -> stringResource(R.string.dash_status_not_responding)
                 },
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -300,6 +304,7 @@ private fun StatusDot(color: androidx.compose.ui.graphics.Color) {
 private fun Hero(kind: HeroKind, state: DashboardUiState, onOpenApps: () -> Unit, onEndFocus: () -> Unit) {
     val snapshot = state.snapshot ?: return
     val now = state.now ?: return
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -308,29 +313,37 @@ private fun Hero(kind: HeroKind, state: DashboardUiState, onOpenApps: () -> Unit
     ) {
         if (kind == HeroKind.Empty) {
             Text(
-                "Empieza por una app",
+                stringResource(R.string.dash_empty_title),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 24.dp),
             )
             Text(
-                "Elige la que más te distrae y decide cuándo y cuánto puedes usarla.",
+                stringResource(R.string.dash_empty_body),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-            GlassButton(text = "Añadir una app", onClick = onOpenApps, modifier = Modifier.fillMaxWidth())
+            GlassButton(text = stringResource(R.string.dash_add_app), onClick = onOpenApps, modifier = Modifier.fillMaxWidth())
             return@Column
         }
 
         val next = snapshot.nextChange
-        val untilLabel = next?.let { RuleText.moment(it, now) }
+        val untilLabel = next?.let { RuleText.moment(context, it, now) }
         val (big, caption) = when (kind) {
-            HeroKind.Focus -> RuleText.moment(snapshot.focus!!.endsAt, now) to "concentración hasta"
+            HeroKind.Focus -> RuleText.moment(context, snapshot.focus!!.endsAt, now) to stringResource(R.string.dash_caption_focus_until)
             HeroKind.Blocking ->
-                if (untilLabel != null && !snapshot.nextChangeStartsBlock) untilLabel to "enfoque hasta" else "Ahora" to "bloqueado"
+                if (untilLabel != null && !snapshot.nextChangeStartsBlock) {
+                    untilLabel to stringResource(R.string.dash_caption_blocking_until)
+                } else {
+                    stringResource(R.string.dash_big_now) to stringResource(R.string.dash_caption_blocked)
+                }
             else ->
-                if (untilLabel != null && snapshot.nextChangeStartsBlock) untilLabel to "próximo bloqueo" else "Libre" to "sin bloqueos"
+                if (untilLabel != null && snapshot.nextChangeStartsBlock) {
+                    untilLabel to stringResource(R.string.dash_caption_next_block)
+                } else {
+                    stringResource(R.string.dash_big_free) to stringResource(R.string.dash_caption_no_blocks)
+                }
         }
 
         val dark = LocalDarkTheme.current
@@ -365,20 +378,20 @@ private fun Hero(kind: HeroKind, state: DashboardUiState, onOpenApps: () -> Unit
 
         if (kind == HeroKind.Focus) {
             val left = Duration.between(now.toInstant(), snapshot.focus!!.endsAt).toMillis().coerceAtLeast(60_000)
-            Text("Quedan ${RuleText.duration(left)}", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.dash_time_left, RuleText.duration(left)), style = MaterialTheme.typography.bodyLarge)
         }
         if (kind == HeroKind.Focus || kind == HeroKind.Blocking) {
             GlassPanel(Modifier.padding(top = 8.dp)) { BlockedList(snapshot.blockedNow, state.labels, now) }
         }
         if (kind == HeroKind.Blocking && next != null && !snapshot.nextChangeStartsBlock) {
             Text(
-                "Próximo descanso a las $untilLabel",
+                stringResource(R.string.dash_next_rest, untilLabel.orEmpty()),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         if (kind == HeroKind.Focus) {
-            GlassGhostButton(text = "Terminar antes", onClick = onEndFocus, modifier = Modifier.fillMaxWidth())
+            GlassGhostButton(text = stringResource(R.string.dash_end_early), onClick = onEndFocus, modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -387,16 +400,17 @@ private fun Hero(kind: HeroKind, state: DashboardUiState, onOpenApps: () -> Unit
 @Composable
 private fun BlockedList(blocked: List<BlockedApp>, labels: Map<String, String>, now: ZonedDateTime) {
     if (blocked.isEmpty()) return
+    val context = LocalContext.current
     Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         blocked.take(MAX_LISTED).forEach { entry ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AppIcon(entry.target.packageName, Modifier.size(28.dp))
                 Text(labelOf(entry.target, labels), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                Text(RuleText.blockedBrief(entry.reason, entry.until, now), style = MaterialTheme.typography.bodyMedium)
+                Text(RuleText.blockedBrief(context, entry.reason, entry.until, now), style = MaterialTheme.typography.bodyMedium)
             }
         }
         if (blocked.size > MAX_LISTED) {
-            Text("y ${blocked.size - MAX_LISTED} más", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.dash_more, blocked.size - MAX_LISTED), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -416,13 +430,13 @@ private fun Facts(state: DashboardUiState) {
     if (snapshot.controlledCount == 0) return
     val stats = state.stats
     val parts = buildList {
-        state.availableMillis?.let { add("Te quedan ${RuleText.duration(it)} hoy") }
-            ?: add("Hoy usaste ${RuleText.duration(snapshot.usedTodayMillis)}")
+        state.availableMillis?.let { add(stringResource(R.string.dash_facts_left, RuleText.duration(it))) }
+            ?: add(stringResource(R.string.dash_facts_used, RuleText.duration(snapshot.usedTodayMillis)))
         if (stats != null && stats.currentStreakDays > 0) {
-            add("${stats.currentStreakDays} ${if (stats.currentStreakDays == 1) "día seguido" else "días seguidos"}")
+            add(pluralStringResource(R.plurals.dash_facts_streak, stats.currentStreakDays, stats.currentStreakDays))
         }
         if (stats != null && stats.attemptsAvoided > 0) {
-            add("${stats.attemptsAvoided} ${if (stats.attemptsAvoided == 1) "apertura evitada" else "aperturas evitadas"} esta semana")
+            add(pluralStringResource(R.plurals.dash_facts_avoided, stats.attemptsAvoided, stats.attemptsAvoided))
         }
     }
     Text(
@@ -455,17 +469,18 @@ private fun rememberCountdown(until: Instant): String {
  */
 @Composable
 private fun BreakSection(breakUntil: Instant?, now: ZonedDateTime?, onStart: (Int) -> Unit, onEnd: () -> Unit) {
+    val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Tomar un descanso", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.dash_break_heading), style = MaterialTheme.typography.titleMedium)
         if (breakUntil != null && now != null) {
             Text(
-                "Tus apps se abren sin espera hasta las ${RuleText.moment(breakUntil, now)}.",
+                stringResource(R.string.dash_break_until, RuleText.moment(context, breakUntil, now)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             val left = rememberCountdown(breakUntil)
             GlassGhostAction(onClick = onEnd, modifier = Modifier.fillMaxWidth()) {
-                Text("Terminar descanso")
+                Text(stringResource(R.string.dash_break_end))
                 Text(
                     left,
                     style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
@@ -475,23 +490,25 @@ private fun BreakSection(breakUntil: Instant?, now: ZonedDateTime?, onStart: (In
             }
         } else {
             Text(
-                "Elige cuánto y tus apps se abren sin esperar. Las reglas estrictas y la concentración siguen en pie.",
+                stringResource(R.string.dash_break_intro),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             var custom by remember { mutableStateOf(false) }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(10, 15, 30).forEach { minutes -> PillChip(text = "$minutes min", onClick = { onStart(minutes) }) }
-                PillChip(text = "Otro tiempo", onClick = { custom = true })
+                // TEMPORARY, for testing: debug builds also offer a 1 minute break.
+                val options = if (BuildConfig.DEBUG) listOf(1, 10, 15, 30) else listOf(10, 15, 30)
+                options.forEach { minutes -> PillChip(text = "$minutes min", onClick = { onStart(minutes) }) }
+                PillChip(text = stringResource(R.string.dash_break_other), onClick = { custom = true })
             }
             if (custom) {
                 var minutes by remember { mutableIntStateOf(20) }
                 AlertDialog(
                     onDismissRequest = { custom = false },
-                    title = { Text("¿Cuánto descansas?") },
+                    title = { Text(stringResource(R.string.dash_break_how_long)) },
                     text = {
                         Stepper(
-                            label = "Duración",
+                            label = stringResource(R.string.dash_break_duration),
                             value = minutes,
                             onValueChange = { minutes = it },
                             range = 5..120,
@@ -499,8 +516,8 @@ private fun BreakSection(breakUntil: Instant?, now: ZonedDateTime?, onStart: (In
                             format = { RuleText.duration(it * 60_000L) },
                         )
                     },
-                    confirmButton = { TextButton(onClick = { custom = false; onStart(minutes) }) { Text("Descansar") } },
-                    dismissButton = { TextButton(onClick = { custom = false }) { Text("Cancelar") } },
+                    confirmButton = { TextButton(onClick = { custom = false; onStart(minutes) }) { Text(stringResource(R.string.dash_break_confirm)) } },
+                    dismissButton = { TextButton(onClick = { custom = false }) { Text(stringResource(R.string.dash_cancel)) } },
                 )
             }
         }
@@ -520,13 +537,12 @@ private fun StalledNotice(onOpenAccessibility: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Pausa no está respondiendo", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.dash_stalled_title), style = MaterialTheme.typography.titleLarge)
             Text(
-                "Está activada en Ajustes, pero el sistema la dejó sin conectar y ahora no bloquea nada. " +
-                    "Apágala y vuelve a encenderla para que funcione otra vez.",
+                stringResource(R.string.dash_stalled_body),
                 style = MaterialTheme.typography.bodyLarge,
             )
-            GlassButton(text = "Abrir ajustes de accesibilidad", onClick = onOpenAccessibility, modifier = Modifier.fillMaxWidth())
+            GlassButton(text = stringResource(R.string.dash_open_accessibility), onClick = onOpenAccessibility, modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -541,20 +557,19 @@ private fun SetupNotice(onOpenAccessibility: () -> Unit, onOpenAppInfo: () -> Un
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Falta activar Pausa", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.dash_setup_title), style = MaterialTheme.typography.titleLarge)
             Text(
-                "Sin su servicio de accesibilidad no sabe qué app tienes abierta y no puede bloquear nada. " +
-                    "Solo mira qué app está en pantalla: no lee tus mensajes ni guarda lo que ves.",
+                stringResource(R.string.dash_setup_body),
                 style = MaterialTheme.typography.bodyLarge,
             )
             Button(onClick = onOpenAccessibility, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                Text("Abrir ajustes de accesibilidad")
+                Text(stringResource(R.string.dash_open_accessibility))
             }
             TextButton(onClick = onOpenAppInfo, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                Text("El interruptor sale gris")
+                Text(stringResource(R.string.dash_switch_grey))
             }
             Text(
-                "Android bloquea este permiso en apps instaladas fuera de la tienda. En la info de la app, toca ⋮ y elige «Permitir ajustes restringidos».",
+                stringResource(R.string.dash_restricted_note),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }

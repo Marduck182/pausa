@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Apps list, rule editor, app picker -->
+    <string name="apps_back">Back</string>
+    <string name="apps_save">Save</string>
+    <string name="apps_cancel">Cancel</string>
+    <string name="apps_remove">Remove</string>
+
+    <string name="apps_title">Apps</string>
+    <string name="apps_add">Add app</string>
+    <string name="apps_empty_title">Nothing controlled yet</string>
+    <string name="apps_empty_body">Add the app that distracts you most. Then you choose when it is blocked and how much you can use it.</string>
+    <string name="apps_empty_action">Add an app</string>
+    <string name="apps_locked_row">Hard mode: cannot be changed now</string>
+    <string name="apps_control_desc">Control %1$s</string>
+    <string name="apps_off_title">Turn off %1$s?</string>
+    <string name="apps_off_msg">It will stop being protected until you turn it on again.</string>
+    <string name="apps_off">Turn off</string>
+    <string name="apps_unreadable">This rule could not be read. It stays blocked until you set it up again.</string>
+
+    <string name="pick_title">Choose an app</string>
+    <string name="pick_search">Search</string>
+    <string name="pick_all_controlled">You already control all your apps.</string>
+    <string name="pick_no_match">No app has that name.</string>
+
+    <string name="apps_save_title">Save these changes?</string>
+    <string name="apps_save_msg_blocking">This rule is blocking right now.</string>
+    <string name="apps_save_msg_pattern">You are about to remove the pattern from this app.</string>
+    <string name="apps_save_msg_off">You are about to turn this rule off.</string>
+
+    <string name="apps_controlled_title">Controlled</string>
+    <string name="apps_controlled_desc">If you turn it off, Pausa ignores this without deleting your rules.</string>
+    <string name="apps_pattern_title">Ask for pattern to enter</string>
+    <string name="apps_pattern_desc">Before opening the app you will have to draw your security pattern. A temporary pass does not skip it.</string>
+    <string name="apps_daily_title">Time per day</string>
+    <string name="apps_daily_desc">It is blocked when you reach the limit and comes back tomorrow.</string>
+    <string name="apps_max">Maximum</string>
+    <string name="apps_openings_title">Openings per day</string>
+    <string name="apps_openings_desc">How many times you can open it. A session that is already open is not cut off.</string>
+    <string name="apps_pause_title_feature">Pause on entry</string>
+    <string name="apps_pause_title_app">Pause before opening</string>
+    <string name="apps_pause_desc">A few seconds to decide whether you really want in.</string>
+    <string name="apps_wait">Wait</string>
+    <string name="apps_breathing">Breathing exercise</string>
+    <string name="apps_inside_title">Inside the app</string>
+    <string name="apps_inside_desc">Block a section without blocking the whole app. It works by reading the screen, and since apps change, it may sometimes fail.</string>
+    <string name="apps_not_set">Not set up</string>
+    <string name="apps_set_up">Set up</string>
+    <string name="apps_block">Block</string>
+    <string name="apps_configure">Configure</string>
+    <string name="apps_hard_title">Hard mode</string>
+    <string name="apps_hard_desc">While this rule is blocking, you will not be able to change, turn off or delete it. You wait for the block to end, as if there were no way out. You can always uninstall the app.</string>
+    <string name="apps_temp_title">Temporary pass</string>
+    <string name="apps_temp_desc">Lets this app through for 10 minutes. It resets your streak of consecutive days.</string>
+    <string name="apps_temp_confirm_title">Allow 10 minutes?</string>
+    <string name="apps_temp_confirm_msg">This resets your streak of consecutive days.</string>
+    <string name="apps_temp_confirm">Allow</string>
+    <string name="apps_temp_button">Allow 10 minutes</string>
+    <string name="apps_remove_rule">Remove this rule</string>
+    <string name="apps_stop_controlling">Stop controlling this app</string>
+
+    <string name="apps_discard_title">Discard changes?</string>
+    <string name="apps_discard_text">What you changed has not been saved.</string>
+    <string name="apps_discard">Discard</string>
+    <string name="apps_keep_editing">Keep editing</string>
+    <string name="apps_remove_title">Remove %1$s?</string>
+    <string name="apps_remove_text">Its rules will be deleted. You can add it again whenever you want.</string>
+    <string name="apps_remove_confirm_title">Remove %1$s</string>
+    <string name="apps_remove_confirm_msg">It will no longer be protected.</string>
+
+    <string name="apps_locked_title">Hard mode is on</string>
+    <string name="apps_locked_text">This rule is blocking now, so it cannot be changed, turned off or deleted until the block ends. That is the idea: the urge of this moment should not beat what you decided calmly.</string>
+
+    <string name="apps_block_title">Block</string>
+    <string name="apps_mode_free">Free</string>
+    <string name="apps_mode_always">Always</string>
+    <string name="apps_mode_schedule">Schedule</string>
+    <string name="apps_mode_free_desc">No block by default. The limits and the pause below still apply.</string>
+    <string name="apps_mode_always_desc">You will not be able to get in while the rule is on.</string>
+    <string name="apps_mode_schedule_desc">Choose when it is blocked, or when it is the only time you can use it.</string>
+    <string name="apps_sched_block">Block during…</string>
+    <string name="apps_sched_allow">Only allow during…</string>
+    <string name="apps_add_window">Add another schedule</string>
+    <string name="apps_workday_preset">Use work hours (Mon–Fri, 9–14 and 16–21)</string>
+    <string name="apps_from">From %1$s</string>
+    <string name="apps_until">Until %1$s</string>
+    <string name="apps_remove_window">Remove this schedule</string>
+    <string name="apps_ends_next_day">Ends the next day.</string>
+</resources>

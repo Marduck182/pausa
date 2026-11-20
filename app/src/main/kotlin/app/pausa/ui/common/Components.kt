@@ -2,6 +2,9 @@
 
 package app.pausa.ui.common
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
+import androidx.annotation.StringRes
 import app.pausa.ui.theme.LocalDarkTheme
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -191,7 +194,8 @@ fun EmptyState(
 @Composable
 fun SkeletonRows(modifier: Modifier = Modifier, count: Int = 5) {
     val block = MaterialTheme.colorScheme.surfaceContainerHigh
-    Column(modifier.fillMaxWidth().semantics { contentDescription = "Cargando" }) {
+    val loading = stringResource(R.string.ui_loading)
+    Column(modifier.fillMaxWidth().semantics { contentDescription = loading }) {
         repeat(count) {
             Row(
                 Modifier
@@ -222,6 +226,8 @@ fun Stepper(
     step: Int = 1,
     format: (Int) -> String = { it.toString() },
 ) {
+    val lessLabel = stringResource(R.string.ui_less)
+    val moreLabel = stringResource(R.string.ui_more)
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -231,7 +237,7 @@ fun Stepper(
         FilledTonalIconButton(
             onClick = { onValueChange((value - step).coerceAtLeast(range.first)) },
             enabled = value > range.first,
-            modifier = Modifier.semantics { contentDescription = "Menos" },
+            modifier = Modifier.semantics { contentDescription = lessLabel },
         ) { Text("−", style = MaterialTheme.typography.titleLarge) }
         Text(
             format(value),
@@ -242,7 +248,7 @@ fun Stepper(
         FilledTonalIconButton(
             onClick = { onValueChange((value + step).coerceAtMost(range.last)) },
             enabled = value < range.last,
-            modifier = Modifier.semantics { contentDescription = "Más" },
+            modifier = Modifier.semantics { contentDescription = moreLabel },
         ) { Text("+", style = MaterialTheme.typography.titleLarge) }
     }
 }
@@ -297,19 +303,19 @@ fun TimeDialog(
     )
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = { onConfirm(state.hour * 60 + state.minute) }) { Text("Aceptar") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
+        confirmButton = { TextButton(onClick = { onConfirm(state.hour * 60 + state.minute) }) { Text(stringResource(R.string.ui_ok)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.ui_cancel)) } },
         text = { TimePicker(state = state) },
     )
 }
 
 /** Tells the person why something was not done. Shown while [message] is not null; [onDismiss] clears it. */
 @Composable
-fun NoticeDialog(message: String?, onDismiss: () -> Unit) {
+fun NoticeDialog(@StringRes message: Int?, onDismiss: () -> Unit) {
     if (message == null) return
     AlertDialog(
         onDismissRequest = onDismiss,
-        text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
-        confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text("Entendido") } },
+        text = { Text(stringResource(message), style = MaterialTheme.typography.bodyMedium) },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_got_it)) } },
     )
 }

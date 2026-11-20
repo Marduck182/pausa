@@ -1,5 +1,7 @@
 package app.pausa.ui.settings
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
 import app.pausa.ui.common.AlertDialog
 import app.pausa.domain.model.BlockExit
 import app.pausa.ui.common.OutlinedButton
@@ -82,66 +84,73 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 8.dp),
     ) {
-        ScreenTitle("Ajustes")
+        ScreenTitle(stringResource(R.string.settings_title))
 
-        Section(title = "Apariencia") {
+        Section(title = stringResource(R.string.settings_appearance)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                listOf(ThemeMode.SYSTEM to "Sistema", ThemeMode.LIGHT to "Claro", ThemeMode.DARK to "Oscuro").forEach { (mode, label) ->
+                listOf(
+                    ThemeMode.SYSTEM to stringResource(R.string.settings_theme_system),
+                    ThemeMode.LIGHT to stringResource(R.string.settings_theme_light),
+                    ThemeMode.DARK to stringResource(R.string.settings_theme_dark),
+                ).forEach { (mode, label) ->
                     PillChip(text = label, onClick = { viewModel.setThemeMode(mode) }, selected = settings.themeMode == mode)
                 }
             }
         }
 
         Section(
-            title = "Al bloquear una app",
-            description = if (settings.blockExit == BlockExit.BACK) "Si volver atrás no la cierra, te lleva al inicio." else null,
+            title = stringResource(R.string.settings_on_block),
+            description = if (settings.blockExit == BlockExit.BACK) stringResource(R.string.settings_on_block_back_note) else null,
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                listOf(BlockExit.HOME to "Ir al inicio", BlockExit.BACK to "Volver atrás").forEach { (exit, label) ->
+                listOf(
+                    BlockExit.HOME to stringResource(R.string.settings_exit_home),
+                    BlockExit.BACK to stringResource(R.string.settings_exit_back),
+                ).forEach { (exit, label) ->
                     PillChip(text = label, onClick = { viewModel.setBlockExit(exit) }, selected = settings.blockExit == exit)
                 }
             }
         }
 
-        Section(title = "Protección") {
+        Section(title = stringResource(R.string.settings_protection)) {
             Text(
-                if (settings.pinEnabled) "PIN activado." else "Sin PIN.",
+                stringResource(if (settings.pinEnabled) R.string.settings_pin_on else R.string.settings_pin_off),
                 style = MaterialTheme.typography.bodyMedium,
             )
             if (!settings.pinEnabled) {
-                Button(onClick = { settingPin = true }, modifier = Modifier.fillMaxWidth()) { Text("Crear PIN") }
+                Button(onClick = { settingPin = true }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_pin_create)) }
             } else {
                 OutlinedButton(
                     onClick = {
                         friction.ask(
-                            title = "Cambiar el PIN",
-                            message = "Escribe tu PIN actual para poder cambiarlo.",
-                            confirmLabel = "Continuar",
+                            title = friction.text(R.string.settings_pin_change_title),
+                            message = friction.text(R.string.settings_pin_change_message),
+                            confirmLabel = friction.text(R.string.settings_continue),
                         ) { settingPin = true }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Cambiar PIN") }
+                ) { Text(stringResource(R.string.settings_pin_change)) }
                 OutlinedButton(
                     onClick = {
                         friction.ask(
-                            title = "Quitar el PIN",
-                            message = "Sin PIN será más fácil saltarte tus propias reglas.",
-                            confirmLabel = "Quitar",
+                            title = friction.text(R.string.settings_pin_remove_title),
+                            message = friction.text(R.string.settings_pin_remove_message),
+                            confirmLabel = friction.text(R.string.settings_remove),
                             onConfirmed = viewModel::removePin,
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text("Quitar PIN") }
+                ) { Text(stringResource(R.string.settings_pin_remove)) }
             }
             Stepper(
-                label = "Espera al apagar reglas",
+                label = stringResource(R.string.settings_cooldown_label),
                 value = settings.cooldownSeconds,
                 onValueChange = { seconds ->
                     if (seconds < settings.cooldownSeconds) {
                         friction.ask(
-                            title = "¿Acortar la espera?",
-                            message = "Una espera más corta da menos tiempo para pensarlo.",
-                            confirmLabel = "Acortar",
+                            title = friction.text(R.string.settings_cooldown_shorten_title),
+                            message = friction.text(R.string.settings_cooldown_shorten_message),
+                            confirmLabel = friction.text(R.string.settings_shorten),
                         ) { viewModel.setCooldown(seconds) }
                     } else {
                         viewModel.setCooldown(seconds)
@@ -153,26 +162,26 @@ fun SettingsScreen(
             )
         }
 
-        Section(title = "Patrón de seguridad") {
+        Section(title = stringResource(R.string.settings_pattern)) {
             Text(
-                if (settings.patternEnabled) "Patrón activado. Se pide en las apps que lo tengan en su regla." else "Sin patrón.",
+                stringResource(if (settings.patternEnabled) R.string.settings_pattern_on else R.string.settings_pattern_off),
                 style = MaterialTheme.typography.bodyMedium,
             )
             if (!settings.patternEnabled) {
-                Button(onClick = { patternStep = PatternStep.Create }, modifier = Modifier.fillMaxWidth()) { Text("Crear patrón") }
+                Button(onClick = { patternStep = PatternStep.Create }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_pattern_create)) }
             } else {
                 OutlinedButton(onClick = { patternStep = PatternStep.VerifyToChange }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Cambiar patrón")
+                    Text(stringResource(R.string.settings_pattern_change))
                 }
                 OutlinedButton(onClick = { patternStep = PatternStep.VerifyToRemove }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Quitar patrón")
+                    Text(stringResource(R.string.settings_pattern_remove))
                 }
             }
         }
 
         Section(
-            title = "Excepciones",
-            description = "Apps que siempre pasan.",
+            title = stringResource(R.string.settings_exceptions),
+            description = stringResource(R.string.settings_exceptions_description),
         ) {
             Row(
                 Modifier
@@ -182,17 +191,21 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    if (settings.exceptions.isEmpty()) "Ninguna" else "${settings.exceptions.size} ${if (settings.exceptions.size == 1) "app" else "apps"}",
+                    if (settings.exceptions.isEmpty()) {
+                        stringResource(R.string.settings_exceptions_none)
+                    } else {
+                        friction.quantity(R.plurals.settings_exceptions_count, settings.exceptions.size, settings.exceptions.size)
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f),
                 )
-                Text("Editar", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.settings_edit), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
             }
         }
 
         Section(
-            title = "Permisos",
-            description = if (serviceEnabled) "Accesibilidad activa." else "Accesibilidad apagada: no se bloquea nada.",
+            title = stringResource(R.string.settings_permissions),
+            description = stringResource(if (serviceEnabled) R.string.settings_accessibility_on else R.string.settings_accessibility_off),
         ) {
             // The long explanation is folded away; with the service off it is what the person needs, so it opens by itself.
             var expanded by remember(serviceEnabled) { mutableStateOf(!serviceEnabled) }
@@ -200,8 +213,8 @@ fun SettingsScreen(
                 Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("Qué pide Pausa y por qué", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                Text(if (expanded) "Ocultar" else "Ver", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.settings_permissions_what), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text(stringResource(if (expanded) R.string.settings_hide else R.string.settings_show), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
             }
             if (expanded) {
                 PermissionGuide()
@@ -209,10 +222,9 @@ fun SettingsScreen(
             }
         }
 
-        Section(title = "Privacidad") {
+        Section(title = stringResource(R.string.settings_privacy)) {
             Text(
-                "Todo se queda en este teléfono: tus reglas, el uso de las apps que controlas (30 días) y tus ajustes. " +
-                    "Sin cuenta ni internet.",
+                stringResource(R.string.settings_privacy_text),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -220,11 +232,11 @@ fun SettingsScreen(
                 onClick = { confirmErase = true },
                 modifier = Modifier.fillMaxWidth(),
                 contentColor = MaterialTheme.colorScheme.error,
-            ) { Text("Borrar todos mis datos") }
+            ) { Text(stringResource(R.string.settings_erase_all)) }
         }
 
         Text(
-            "Pausa ${BuildConfig.VERSION_NAME}",
+            stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(vertical = 16.dp),
@@ -247,15 +259,15 @@ fun SettingsScreen(
             onDismiss = { patternStep = null },
         )
         PatternStep.VerifyToChange -> VerifyPatternDialog(
-            title = "Cambiar el patrón",
-            message = "Dibuja tu patrón actual para poder cambiarlo.",
+            title = stringResource(R.string.settings_pattern_change_title),
+            message = stringResource(R.string.settings_pattern_change_message),
             verify = viewModel::verifyPattern,
             onVerified = { patternStep = PatternStep.Create },
             onDismiss = { patternStep = null },
         )
         PatternStep.VerifyToRemove -> VerifyPatternDialog(
-            title = "Quitar el patrón",
-            message = "Dibuja tu patrón actual. Las apps que lo piden dejarán de pedirlo.",
+            title = stringResource(R.string.settings_pattern_remove_title),
+            message = stringResource(R.string.settings_pattern_remove_message),
             verify = viewModel::verifyPattern,
             onVerified = { viewModel.removePattern(); patternStep = null },
             onDismiss = { patternStep = null },
@@ -265,22 +277,22 @@ fun SettingsScreen(
     if (confirmErase) {
         AlertDialog(
             onDismissRequest = { confirmErase = false },
-            title = { Text("¿Borrar todos tus datos?") },
-            text = { Text("Se borran tus reglas, el uso, las estadísticas, las excepciones y el PIN. No se puede deshacer.") },
+            title = { Text(stringResource(R.string.settings_erase_title)) },
+            text = { Text(stringResource(R.string.settings_erase_text)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         confirmErase = false
                         friction.ask(
-                            title = "Borrar todo",
-                            message = "Última confirmación: Pausa volverá a estar como recién instalada.",
-                            confirmLabel = "Borrar",
+                            title = friction.text(R.string.settings_erase_confirm_title),
+                            message = friction.text(R.string.settings_erase_confirm_message),
+                            confirmLabel = friction.text(R.string.settings_delete),
                             onConfirmed = viewModel::eraseEverything,
                         )
                     },
-                ) { Text("Borrar") }
+                ) { Text(stringResource(R.string.settings_delete)) }
             },
-            dismissButton = { TextButton(onClick = { confirmErase = false }) { Text("Cancelar") } },
+            dismissButton = { TextButton(onClick = { confirmErase = false }) { Text(stringResource(R.string.settings_cancel)) } },
         )
     }
     val notice by viewModel.notice.collectAsStateWithLifecycle()
@@ -295,18 +307,21 @@ private fun PinDialog(onDismiss: () -> Unit, onSave: (String) -> Boolean) {
     var pin by remember { mutableStateOf("") }
     var again by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    // Resolved here: the click handler below is not composable.
+    val lengthError = stringResource(R.string.settings_pin_length_error, PinHasher.MIN_LENGTH, PinHasher.MAX_LENGTH)
+    val mismatchError = stringResource(R.string.settings_pin_mismatch)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo PIN") },
+        title = { Text(stringResource(R.string.settings_pin_new)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    "De ${PinHasher.MIN_LENGTH} a ${PinHasher.MAX_LENGTH} dígitos. No es una contraseña bancaria: sirve para frenar un impulso.",
+                    stringResource(R.string.settings_pin_hint, PinHasher.MIN_LENGTH, PinHasher.MAX_LENGTH),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                PinField("PIN", pin) { pin = it; error = null }
-                PinField("Repite el PIN", again) { again = it; error = null }
+                PinField(stringResource(R.string.settings_pin_field), pin) { pin = it; error = null }
+                PinField(stringResource(R.string.settings_pin_repeat), again) { again = it; error = null }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
             }
         },
@@ -314,14 +329,14 @@ private fun PinDialog(onDismiss: () -> Unit, onSave: (String) -> Boolean) {
             TextButton(
                 onClick = {
                     when {
-                        !PinHasher.isValid(pin) -> error = "Usa entre ${PinHasher.MIN_LENGTH} y ${PinHasher.MAX_LENGTH} dígitos."
-                        pin != again -> error = "Los dos PIN no coinciden."
+                        !PinHasher.isValid(pin) -> error = lengthError
+                        pin != again -> error = mismatchError
                         else -> onSave(pin)
                     }
                 },
-            ) { Text("Guardar") }
+            ) { Text(stringResource(R.string.settings_save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
     )
 }
 

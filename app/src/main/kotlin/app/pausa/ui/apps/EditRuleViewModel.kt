@@ -72,10 +72,10 @@ class EditRuleViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    private val _notice = MutableStateFlow<String?>(null)
+    private val _notice = MutableStateFlow<Int?>(null)
 
     /** Why the last action was not done, or null. Shown in a dialog until the person dismisses it. */
-    val notice: StateFlow<String?> = _notice.asStateFlow()
+    val notice: StateFlow<Int?> = _notice.asStateFlow()
 
     fun dismissNotice() {
         _notice.value = null

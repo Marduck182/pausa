@@ -1,5 +1,6 @@
 package app.pausa.domain.usecase
 
+import app.pausa.domain.model.AppAttemptStat
 import app.pausa.domain.model.AppUsageStat
 import app.pausa.domain.model.CompletedSession
 import app.pausa.domain.model.InterventionOutcome
@@ -38,6 +39,8 @@ object StatsCalculator {
             .map { (pkg, sessions) -> AppUsageStat(pkg, sessions.sumOf { millis(it) }) }
             .sortedByDescending { it.millis }
 
+        val attemptsToday = attemptsToday(raw, today, zone)
+
         val minutesByHour = minutesByHour(weekSessions, zone)
         val peak = minutesByHour.withIndex().maxByOrNull { it.value }?.takeIf { it.value > 0 }?.index
 
@@ -53,11 +56,29 @@ object StatsCalculator {
             },
             estimatedSavedMillis = saved,
             usageByApp = usageByApp,
+            attemptsTodayByApp = attemptsToday,
             minutesByHour = minutesByHour,
             peakHour = peak,
             currentStreakDays = streaks.first,
             bestStreakDays = streaks.second,
         )
+    }
+
+    /**
+     * Each time the user went for a controlled app today ends one of three ways: it opened (a session started), it was
+     * blocked, or the user backed out of the pause. So attempts = sessions + blocked + backed out. A pause that was
+     * gone through is not added again: the session that follows already counts it.
+     */
+    private fun attemptsToday(raw: RawStats, today: LocalDate, zone: ZoneId): List<AppAttemptStat> {
+        val dayStart = today.atStartOfDay(zone).toInstant()
+        val opened = raw.sessions.filter { it.start >= dayStart }.groupingBy { it.packageName }.eachCount()
+        val stopped = raw.events
+            .filter { it.timestamp >= dayStart && it.outcome.isAvoided }
+            .groupingBy { it.packageName }
+            .eachCount()
+        return (opened.keys + stopped.keys)
+            .map { pkg -> AppAttemptStat(pkg, attempts = (opened[pkg] ?: 0) + (stopped[pkg] ?: 0), stopped = stopped[pkg] ?: 0) }
+            .sortedWith(compareByDescending<AppAttemptStat> { it.attempts }.thenBy { it.packageName })
     }
 
     private fun millis(session: CompletedSession) = Duration.between(session.start, session.end).toMillis()

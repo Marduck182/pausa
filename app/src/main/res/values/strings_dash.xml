@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dashboard -->
+    <string name="dash_end_focus_title">End focus?</string>
+    <string name="dash_end_focus_message">Ending it early resets your streak of consecutive days.</string>
+    <string name="dash_end_focus_confirm">End</string>
+    <string name="dash_break_title">Take a %1$d min break?</string>
+    <plurals name="dash_break_message">
+        <item quantity="one">Your apps will open without a wait for %1$d minute. Strict rules and focus still apply.</item>
+        <item quantity="other">Your apps will open without a wait for %1$d minutes. Strict rules and focus still apply.</item>
+    </plurals>
+    <string name="dash_break_confirm">Take a break</string>
+    <string name="dash_privacy_line">Your data stays on this phone. Pausa has no internet permission.</string>
+    <string name="dash_status_active">Active</string>
+    <string name="dash_status_off">Off</string>
+    <string name="dash_status_not_responding">Not responding</string>
+    <string name="dash_empty_title">Start with one app</string>
+    <string name="dash_empty_body">Pick the one that distracts you most and decide when and how much you can use it.</string>
+    <string name="dash_add_app">Add an app</string>
+    <string name="dash_caption_focus_until">focus until</string>
+    <string name="dash_caption_blocking_until">focus until</string>
+    <string name="dash_big_now">Now</string>
+    <string name="dash_caption_blocked">blocked</string>
+    <string name="dash_caption_next_block">next block</string>
+    <string name="dash_big_free">Free</string>
+    <string name="dash_caption_no_blocks">no blocks</string>
+    <string name="dash_time_left">%1$s left</string>
+    <string name="dash_next_rest">Next break at %1$s</string>
+    <string name="dash_end_early">End early</string>
+    <string name="dash_more">and %1$d more</string>
+    <string name="dash_facts_left">%1$s left today</string>
+    <string name="dash_facts_used">Used %1$s today</string>
+    <plurals name="dash_facts_streak">
+        <item quantity="one">%1$d day in a row</item>
+        <item quantity="other">%1$d days in a row</item>
+    </plurals>
+    <plurals name="dash_facts_avoided">
+        <item quantity="one">%1$d opening avoided this week</item>
+        <item quantity="other">%1$d openings avoided this week</item>
+    </plurals>
+    <string name="dash_break_heading">Take a break</string>
+    <string name="dash_break_until">Your apps open without a wait until %1$s.</string>
+    <string name="dash_break_end">End break</string>
+    <string name="dash_break_intro">Choose how long and your apps open without waiting. Strict rules and focus still apply.</string>
+    <string name="dash_break_other">Other time</string>
+    <string name="dash_break_how_long">How long is your break?</string>
+    <string name="dash_break_duration">Duration</string>
+    <string name="dash_cancel">Cancel</string>
+    <string name="dash_stalled_title">Pausa is not responding</string>
+    <string name="dash_stalled_body">It is turned on in Settings, but the system left it disconnected and it is not blocking anything now. Turn it off and on again to make it work.</string>
+    <string name="dash_open_accessibility">Open accessibility settings</string>
+    <string name="dash_setup_title">Pausa needs to be turned on</string>
+    <string name="dash_setup_body">Without its accessibility service it does not know which app you have open and cannot block anything. It only looks at which app is on screen: it does not read your messages or store what you see.</string>
+    <string name="dash_switch_grey">The switch is greyed out</string>
+    <string name="dash_restricted_note">Android blocks this permission for apps installed outside the store. In the app info, tap ⋮ and choose “Allow restricted settings”.</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">How you are doing</string>
+    <string name="stats_streak_title">Streak</string>
+    <plurals name="stats_streak_unit">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <string name="stats_streak_start">You start today</string>
+    <plurals name="stats_streak_days">
+        <item quantity="one">%1$d day in a row</item>
+        <item quantity="other">%1$d days in a row</item>
+    </plurals>
+    <plurals name="stats_best_streak">
+        <item quantity="one">Your best streak was %1$d day.</item>
+        <item quantity="other">Your best streak was %1$d days.</item>
+    </plurals>
+    <string name="stats_week_title">This week</string>
+    <string name="stats_week_empty">Nothing to count yet.</string>
+    <plurals name="stats_avoided_description">
+        <item quantity="one">You avoided %1$d opening</item>
+        <item quantity="other">You avoided %1$d openings</item>
+    </plurals>
+    <plurals name="stats_avoided_label">
+        <item quantity="one">opening avoided</item>
+        <item quantity="other">openings avoided</item>
+    </plurals>
+    <plurals name="stats_blocks">
+        <item quantity="one">%1$d block</item>
+        <item quantity="other">%1$d blocks</item>
+    </plurals>
+    <plurals name="stats_pauses">
+        <item quantity="one">%1$d pause</item>
+        <item quantity="other">%1$d pauses</item>
+    </plurals>
+    <string name="stats_and">" and "</string>
+    <string name="stats_today_title">Today you tried to open</string>
+    <string name="stats_today_empty">You have not tried to open any yet.</string>
+    <plurals name="stats_times">
+        <item quantity="one">%1$d time</item>
+        <item quantity="other">%1$d times</item>
+    </plurals>
+    <string name="stats_attempts_description">%1$s: %2$s</string>
+    <plurals name="stats_stopped_count">
+        <item quantity="one">%1$d stopped by Pausa</item>
+        <item quantity="other">%1$d stopped by Pausa</item>
+    </plurals>
+    <string name="stats_stopped_detail">Pausa stopped you %1$s.</string>
+    <string name="stats_hours_title">When you get distracted most</string>
+    <string name="stats_hours_peak">Mostly between %1$s and %2$s.</string>
+    <string name="stats_hours_hide">Hide the hours</string>
+    <string name="stats_hours_show">See all hours</string>
+    <string name="stats_hours_chart_description">Use by hour of the day; the peak is at %1$s</string>
+    <string name="stats_hour_axis">%1$d h</string>
+</resources>

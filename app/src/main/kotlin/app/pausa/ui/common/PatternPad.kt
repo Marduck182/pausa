@@ -1,5 +1,7 @@
 package app.pausa.ui.common
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +72,7 @@ fun PatternPad(
         return null
     }
 
+    val padDescription = stringResource(R.string.pat_pad_description)
     val primary = MaterialTheme.colorScheme.primary
     val errorColor = MaterialTheme.colorScheme.error
     val idle = MaterialTheme.colorScheme.outlineVariant
@@ -79,7 +82,7 @@ fun PatternPad(
         modifier
             .aspectRatio(1f)
             .onSizeChanged { size = it }
-            .semantics { contentDescription = "Zona para dibujar el patrón con el dedo" }
+            .semantics { contentDescription = padDescription }
             .pointerInput(enabled) {
                 if (!enabled) return@pointerInput
                 detectDragGestures(
@@ -137,7 +140,7 @@ fun PatternChallenge(
     verify: suspend (List<Int>) -> Boolean,
     onVerified: () -> Unit,
     modifier: Modifier = Modifier,
-    idleHint: String = "Dibuja tu patrón.",
+    idleHint: String? = null,
 ) {
     var wrong by remember { mutableStateOf(false) }
     // The wait may already be running from an earlier screen: the count is not this one's to reset.
@@ -181,9 +184,9 @@ fun PatternChallenge(
         )
         Text(
             text = when {
-                lockedSeconds > 0 -> "Demasiados intentos. Espera $lockedSeconds s."
-                wrong -> "Patrón incorrecto."
-                else -> idleHint
+                lockedSeconds > 0 -> stringResource(R.string.pat_too_many_attempts, lockedSeconds)
+                wrong -> stringResource(R.string.pat_wrong)
+                else -> idleHint ?: stringResource(R.string.pat_idle)
             }.ifEmpty { " " }, // the line is kept so the pad does not jump when an error appears
 
             style = MaterialTheme.typography.bodyMedium,

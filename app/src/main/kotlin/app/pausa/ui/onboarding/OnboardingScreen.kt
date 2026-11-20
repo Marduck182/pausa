@@ -1,5 +1,6 @@
 package app.pausa.ui.onboarding
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.AnimatedContent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -103,7 +104,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             horizontalArrangement = Arrangement.End,
         ) {
             ForwardAction(
-                label = if (page == last) "Empezar" else if (page == 0) "Comenzar" else "Siguiente",
+                label = stringResource(if (page == last) R.string.onb_finish else if (page == 0) R.string.onb_begin else R.string.onb_next),
                 onClick = { if (page == last) onFinish() else page++ },
             )
         }
@@ -113,6 +114,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
 /** Back on the left (from the second page on), the name in the middle, and where the person is on the right. */
 @Composable
 private fun TopBar(page: Int, onBack: () -> Unit) {
+    val stepDescription = stringResource(R.string.onb_step_description, page + 1, PAGES)
     Row(
         Modifier
             .fillMaxWidth()
@@ -122,7 +124,7 @@ private fun TopBar(page: Int, onBack: () -> Unit) {
         Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
             if (page > 0) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.onb_back))
                 }
             }
         }
@@ -141,7 +143,7 @@ private fun TopBar(page: Int, onBack: () -> Unit) {
             textAlign = TextAlign.End,
             modifier = Modifier
                 .width(48.dp)
-                .semantics { contentDescription = "Paso ${page + 1} de $PAGES" },
+                .semantics { contentDescription = stepDescription },
         )
     }
 }
@@ -188,36 +190,35 @@ private fun Welcome(compact: Boolean) {
             .size(if (compact) 72.dp else 144.dp),
     )
     Text(
-        "Un momento antes de abrir esa app.",
+        stringResource(R.string.onb_welcome_title),
         style = MaterialTheme.typography.headlineMedium,
         modifier = Modifier.padding(top = if (compact) 0.dp else 16.dp),
     )
     Text(
-        "Tú eliges qué apps controlar, en qué horarios y cuánto tiempo. Pausa te frena con una pausa, o las bloquea, " +
-            "y puede incluso cerrar una sección como los Shorts sin cerrar toda la app.",
+        stringResource(R.string.onb_welcome_body),
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    Text("Tu privacidad es lo primero", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+    Text(stringResource(R.string.onb_privacy_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
     listOf(
-        "Todo ocurre en este teléfono.",
-        "No necesita cuenta.",
-        "No tiene permiso de internet: no puede enviar nada fuera.",
-        "No lee tus mensajes, fotos ni contactos.",
+        stringResource(R.string.onb_privacy_1),
+        stringResource(R.string.onb_privacy_2),
+        stringResource(R.string.onb_privacy_3),
+        stringResource(R.string.onb_privacy_4),
     ).forEach { Text("•  $it", style = MaterialTheme.typography.bodyLarge) }
 }
 
 @Composable
 private fun Permissions() {
-    Text("Qué pedimos y por qué", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = 8.dp))
+    Text(stringResource(R.string.onb_permissions_title), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = 8.dp))
     PermissionGuide()
 }
 
 @Composable
 private fun Activate() {
-    Text("Actívala cuando quieras", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = 8.dp))
+    Text(stringResource(R.string.onb_activate_title), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = 8.dp))
     Text(
-        "Android pide que este permiso lo des tú, a mano. Puedes hacerlo ahora o más tarde desde el inicio.",
+        stringResource(R.string.onb_activate_body),
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

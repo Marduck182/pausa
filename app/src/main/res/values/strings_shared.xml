@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_got_it">Got it</string>
+    <string name="msg_rule_locked">This rule is in strict mode and blocking right now. It cannot be changed until the block ends.</string>
+    <string name="msg_save_failed">The change could not be saved. Try again.</string>
+
+    <string name="rule_tomorrow_at">tomorrow %1$s</string>
+    <string name="rule_brief_always">always</string>
+    <string name="rule_brief_until">until %1$s</string>
+    <string name="rule_brief_now">now</string>
+    <string name="rule_brief_daily_limit">today\'s limit</string>
+    <string name="rule_brief_session_limit">today\'s openings</string>
+    <string name="rule_every_day">Every day</string>
+    <string name="rule_weekdays">Mon–Fri</string>
+    <string name="rule_weekend">Weekend</string>
+    <string name="rule_always_blocked">Always blocked</string>
+    <string name="rule_blocked">Blocked</string>
+    <string name="rule_only_allowed">Only allowed</string>
+    <string name="rule_minutes_a_day">%1$d min a day</string>
+    <string name="rule_asks_pattern">asks for pattern</string>
+    <string name="rule_pause_seconds">%1$d s pause</string>
+    <string name="rule_no_restrictions">No restrictions</string>
+    <string name="rule_minutes_of">%1$d of %2$d min</string>
+    <string name="rule_today">Today: %1$s</string>
+    <plurals name="rule_max_openings">
+        <item quantity="one">max. %1$d opening a day</item>
+        <item quantity="other">max. %1$d openings a day</item>
+    </plurals>
+    <plurals name="rule_openings_of">
+        <item quantity="one">%1$d of %2$d opening</item>
+        <item quantity="other">%1$d of %2$d openings</item>
+    </plurals>
+    <plurals name="rule_openings">
+        <item quantity="one">%1$d opening</item>
+        <item quantity="other">%1$d openings</item>
+    </plurals>
+
+    <string name="block_by_rule">Blocked by your rule.</string>
+    <string name="block_available">You can use it %1$s.</string>
+    <string name="block_at_time">at %1$s</string>
+    <string name="block_tomorrow_at">tomorrow at %1$s</string>
+    <string name="block_on_day_at">on %1$s at %2$s</string>
+    <string name="block_daily_limit">You reached today\'s limit. It comes back tomorrow.</string>
+    <string name="block_session_limit">You already used today\'s openings.</string>
+    <string name="block_focus_until">Focus until %1$s.</string>
+    <string name="block_focus">In focus.</string>
+</resources>

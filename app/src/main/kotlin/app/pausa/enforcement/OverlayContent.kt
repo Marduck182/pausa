@@ -1,5 +1,7 @@
 package app.pausa.enforcement
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
 import app.pausa.ui.theme.LocalDarkTheme
 import app.pausa.ui.common.GlassGhostAction
 import android.provider.Settings
@@ -85,12 +87,12 @@ fun InterventionContent(
 
         OverlayFrame(
             icon = { GlassSphere(size = 88.dp, halo = false, blur = true) { AppIcon(packageName, Modifier.size(52.dp)) } },
-            title = "¿Abrir $appLabel?",
-            message = if (breathing || waitSeconds == 0) null else "Tómate un momento antes de entrar.",
+            title = stringResource(R.string.ovl_open_app_title, appLabel),
+            message = if (breathing || waitSeconds == 0) null else stringResource(R.string.ovl_take_a_moment),
             body = { if (waitSeconds > 0) PauseRing(remaining, waitSeconds, breathing) },
-            primaryLabel = "Mejor no",
+            primaryLabel = stringResource(R.string.ovl_better_not),
             onPrimary = onCancel,
-            secondaryLabel = if (remaining == 0) "Abrir $appLabel" else "Abrir en $remaining s",
+            secondaryLabel = if (remaining == 0) stringResource(R.string.ovl_open_app, appLabel) else stringResource(R.string.ovl_open_in, remaining),
             secondaryEnabled = remaining == 0,
             onSecondary = onContinue,
         )
@@ -138,7 +140,11 @@ fun BlockContent(
             primaryLabel = dismissLabel,
             onPrimary = onDismiss,
             secondaryLabel = temporaryAllowMinutes?.let {
-                if (remaining == 0) "Permitir $it minutos" else "Permitir $it min en $remaining s"
+                if (remaining == 0) {
+                    LocalContext.current.resources.getQuantityString(R.plurals.ovl_allow_minutes, it, it)
+                } else {
+                    stringResource(R.string.ovl_allow_minutes_in, it, remaining)
+                }
             },
             secondaryEnabled = remaining == 0,
             onSecondary = onAllowTemporarily,
@@ -162,8 +168,8 @@ fun PatternLockContent(
     PausaTheme(themeMode) {
         OverlayFrame(
             icon = { GlassSphere(size = 88.dp, halo = false, blur = true) { AppIcon(packageName, Modifier.size(52.dp)) } },
-            title = "Dibuja tu patrón",
-            message = "para abrir $appLabel",
+            title = stringResource(R.string.ovl_pattern_title),
+            message = stringResource(R.string.ovl_pattern_message, appLabel),
             body = {
                 PatternChallenge(
                     verify = verify,
@@ -177,7 +183,7 @@ fun PatternLockContent(
             },
             primaryLabel = null,
             onPrimary = {},
-            secondaryLabel = "Cancelar",
+            secondaryLabel = stringResource(R.string.ovl_cancel),
             secondaryEnabled = true,
             onSecondary = onCancel,
         )
@@ -291,14 +297,14 @@ private fun rememberAnimationsOff(): Boolean {
     }
 }
 
-/** Between 0.86 and 1 while [active], following the breath; a constant 1 otherwise, with nothing running. */
+/** Between [SWELL_MIN] and [SWELL_MAX] while [active], following the breath; a constant 1 otherwise, with nothing running. */
 @Composable
 private fun rememberSwell(active: Boolean): Float {
     if (!active) return 1f
     val transition = rememberInfiniteTransition(label = "breathing")
     val swell by transition.animateFloat(
-        initialValue = 0.86f,
-        targetValue = 1f,
+        initialValue = SWELL_MIN,
+        targetValue = SWELL_MAX,
         animationSpec = infiniteRepeatable(tween(BREATH_MILLIS, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "swell",
     )
@@ -324,16 +330,17 @@ private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
     }
 
     val compact = rememberCompactHeight()
-    GlassSphere(
-        size = if (compact) 112.dp else 168.dp,
-        halo = !compact,
-        modifier = Modifier
-            .padding(vertical = if (compact) 8.dp else HALO_ROOM)
-            .scale(swell),
+    val base = if (compact) 112.dp else 168.dp
+    // Only the sphere swells; the word or number inside keeps its size so it stays readable when the sphere is small.
+    // The box has the full size, so the layout does not move with the breath.
+    Box(
+        Modifier.padding(vertical = if (compact) 8.dp else HALO_ROOM).size(base),
+        contentAlignment = Alignment.Center,
     ) {
+        GlassSphere(size = base, halo = !compact, modifier = Modifier.scale(swell))
         when {
             breathing -> Text(
-                if (inhale) "Inhala" else "Exhala",
+                stringResource(if (inhale) R.string.ovl_inhale else R.string.ovl_exhale),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -342,12 +349,16 @@ private fun PauseRing(remaining: Int, total: Int, breathing: Boolean) {
                 style = NumeralStyle.copy(fontSize = if (compact) 40.sp else 56.sp, lineHeight = if (compact) 44.sp else 60.sp),
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            else -> Text("Listo", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            else -> Text(stringResource(R.string.ovl_done), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 private const val BREATH_MILLIS = 4_000
+
+/** How small and how big the sphere gets while breathing, as a share of its size: a clear swell, not a flicker. */
+private const val SWELL_MIN = 0.6f
+private const val SWELL_MAX = 1.12f
 
 /** What a sphere's halo needs above and below it so nothing clips it. */
 private val HALO_ROOM = 64.dp

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Componentes comunes -->
+    <string name="ui_loading">Cargando</string>
+    <string name="ui_less">Menos</string>
+    <string name="ui_more">Más</string>
+    <string name="ui_ok">Aceptar</string>
+    <string name="ui_cancel">Cancelar</string>
+
+    <!-- Navegación principal -->
+    <string name="ui_nav_home">Inicio</string>
+    <string name="ui_nav_apps">Apps</string>
+    <string name="ui_nav_stats">Estadísticas</string>
+    <string name="ui_nav_settings">Ajustes</string>
+    <string name="ui_nav_lab">Lab</string>
+
+    <!-- Patrón -->
+    <string name="pat_min_dots_hint">Une al menos %1$d puntos.</string>
+    <string name="pat_new">Nuevo patrón</string>
+    <string name="pat_draw_again">Dibújalo otra vez</string>
+    <string name="pat_too_short">Muy corto: une al menos %1$d puntos.</string>
+    <string name="pat_confirm">Para confirmar, dibuja el mismo patrón.</string>
+    <string name="pat_mismatch">No coinciden. Empieza de nuevo.</string>
+    <string name="pat_disclaimer">Sirve para frenar un impulso o una mano curiosa; no es una protección contra alguien con tiempo y conocimientos.</string>
+    <string name="pat_cancel">Cancelar</string>
+    <string name="pat_pad_description">Zona para dibujar el patrón con el dedo</string>
+    <string name="pat_idle">Dibuja tu patrón.</string>
+    <string name="pat_wrong">Patrón incorrecto.</string>
+    <string name="pat_too_many_attempts">Demasiados intentos. Espera %1$d s.</string>
+
+    <!-- Confirmación con espera (y PIN) -->
+    <string name="fric_pin_label">PIN</string>
+    <string name="fric_too_many_attempts">Demasiados intentos. Espera %1$d s.</string>
+    <string name="fric_wrong_pin">PIN incorrecto.</string>
+    <string name="fric_breathe">Respira. Podrás continuar en %1$d s.</string>
+    <string name="fric_better_not">Mejor no</string>
+
+    <!-- Bienvenida -->
+    <string name="onb_finish">Empezar</string>
+    <string name="onb_begin">Comenzar</string>
+    <string name="onb_next">Siguiente</string>
+    <string name="onb_back">Atrás</string>
+    <string name="onb_step_description">Paso %1$d de %2$d</string>
+    <string name="onb_welcome_title">Un momento antes de abrir esa app.</string>
+    <string name="onb_welcome_body">Tú eliges qué apps controlar, en qué horarios y cuánto tiempo. Pausa te frena con una pausa, o las bloquea, y puede incluso cerrar una sección como los Shorts sin cerrar toda la app.</string>
+    <string name="onb_privacy_title">Tu privacidad es lo primero</string>
+    <string name="onb_privacy_1">Todo ocurre en este teléfono.</string>
+    <string name="onb_privacy_2">No necesita cuenta.</string>
+    <string name="onb_privacy_3">No tiene permiso de internet: no puede enviar nada fuera.</string>
+    <string name="onb_privacy_4">No lee tus mensajes, fotos ni contactos.</string>
+    <string name="onb_permissions_title">Qué pedimos y por qué</string>
+    <string name="onb_activate_title">Actívala cuando quieras</string>
+    <string name="onb_activate_body">Android pide que este permiso lo des tú, a mano. Puedes hacerlo ahora o más tarde desde el inicio.</string>
+</resources>

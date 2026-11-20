@@ -2,6 +2,9 @@
 
 package app.pausa.ui.apps
 
+import androidx.compose.ui.platform.LocalContext
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
 import app.pausa.ui.common.AlertDialog
 import app.pausa.ui.common.Switch
 import app.pausa.ui.common.OutlinedButton
@@ -89,16 +92,24 @@ fun EditRuleScreen(
         (state.original?.patternLock == true && !draft.patternLock) ||
         state.blockingNow
     )
+    val saveTitle = stringResource(R.string.apps_save_title)
+    val saveMessage = stringResource(
+        when {
+            state.blockingNow -> R.string.apps_save_msg_blocking
+            draft != null && !draft.patternLock && state.original?.patternLock == true -> R.string.apps_save_msg_pattern
+            else -> R.string.apps_save_msg_off
+        },
+    )
+    val saveLabel = stringResource(R.string.apps_save)
+    val allowTitle = stringResource(R.string.apps_temp_confirm_title)
+    val allowMessage = stringResource(R.string.apps_temp_confirm_msg)
+    val allowLabel = stringResource(R.string.apps_temp_confirm)
     val save = {
         if (savingNeedsPause) {
             friction.ask(
-                title = "¿Guardar estos cambios?",
-                message = when {
-                    state.blockingNow -> "Esta regla está bloqueando ahora mismo."
-                    !draft.patternLock && state.original?.patternLock == true -> "Vas a quitar el patrón de esta app."
-                    else -> "Vas a apagar esta regla."
-                },
-                confirmLabel = "Guardar",
+                title = saveTitle,
+                message = saveMessage,
+                confirmLabel = saveLabel,
                 onConfirmed = viewModel::save,
             )
         } else {
@@ -111,11 +122,11 @@ fun EditRuleScreen(
             TopAppBar(
                 title = { Text(state.label) },
                 navigationIcon = {
-                    IconButton(onClick = requestBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver") }
+                    IconButton(onClick = requestBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.apps_back)) }
                 },
                 actions = {
                     TextButton(onClick = save, enabled = draft != null && draft.isValid && state.dirty && !state.locked) {
-                        Text("Guardar")
+                        Text(stringResource(R.string.apps_save))
                     }
                 },
             )
@@ -134,19 +145,22 @@ fun EditRuleScreen(
                     .padding(horizontal = 20.dp, vertical = 8.dp),
             ) {
                 Section(
-                    title = "Controlada",
-                    description = "Si la apagas, Pausa ignora esto sin borrar tus reglas.",
+                    title = stringResource(R.string.apps_controlled_title),
+                    description = stringResource(R.string.apps_controlled_desc),
                     checked = draft.enabled,
                     onCheckedChange = viewModel::setEnabled,
                 )
 
                 BlockSection(draft, viewModel, onPick = { picking = it })
 
-                if (!isFeature) {
+                // "Siempre" already blocks everything: a pattern, a limit, a count or a pause would never be reached.
+                // The values stay in the draft, so switching to another mode brings them back as they were.
+                val always = draft.blockMode == BlockMode.ALWAYS
+
+                if (!isFeature && !always) {
                     Section(
-                        title = "Pedir patrón para entrar",
-                        description = "Antes de abrir la app tendrás que dibujar tu patrón de seguridad. " +
-                            "Un permiso temporal no lo salta.",
+                        title = stringResource(R.string.apps_pattern_title),
+                        description = stringResource(R.string.apps_pattern_desc),
                         checked = draft.patternLock,
                         onCheckedChange = { on ->
                             // The first time there is no pattern yet: it is created right here.
@@ -155,13 +169,13 @@ fun EditRuleScreen(
                     )
 
                     Section(
-                        title = "Tiempo al día",
-                        description = "Se bloquea al llegar al límite y vuelve mañana.",
+                        title = stringResource(R.string.apps_daily_title),
+                        description = stringResource(R.string.apps_daily_desc),
                         checked = draft.dailyLimitMinutes != null,
                         onCheckedChange = { viewModel.setDailyLimit(if (it) 30 else null) },
                     ) {
                         Stepper(
-                            label = "Máximo",
+                            label = stringResource(R.string.apps_max),
                             value = draft.dailyLimitMinutes ?: 30,
                             onValueChange = viewModel::setDailyLimit,
                             range = 5..480,
@@ -171,13 +185,13 @@ fun EditRuleScreen(
                     }
 
                     Section(
-                        title = "Aperturas al día",
-                        description = "Cuántas veces puedes abrirla. Una sesión ya abierta no se corta.",
+                        title = stringResource(R.string.apps_openings_title),
+                        description = stringResource(R.string.apps_openings_desc),
                         checked = draft.maxSessionsPerDay != null,
                         onCheckedChange = { viewModel.setMaxSessions(if (it) 3 else null) },
                     ) {
                         Stepper(
-                            label = "Máximo",
+                            label = stringResource(R.string.apps_max),
                             value = draft.maxSessionsPerDay ?: 3,
                             onValueChange = viewModel::setMaxSessions,
                             range = 1..20,
@@ -186,15 +200,15 @@ fun EditRuleScreen(
                 }
 
                 val intervention = draft.intervention
-                Section(
-                    title = if (isFeature) "Pausa al entrar" else "Pausa antes de abrir",
-                    description = "Unos segundos para decidir si de verdad quieres entrar.",
+                if (!always) Section(
+                    title = stringResource(if (isFeature) R.string.apps_pause_title_feature else R.string.apps_pause_title_app),
+                    description = stringResource(R.string.apps_pause_desc),
                     checked = intervention != null,
                     onCheckedChange = { viewModel.setIntervention(if (it) Restriction.Intervention() else null) },
                 ) {
                     if (intervention != null) {
                         Stepper(
-                            label = "Espera",
+                            label = stringResource(R.string.apps_wait),
                             value = intervention.waitSeconds,
                             onValueChange = { viewModel.setIntervention(intervention.copy(waitSeconds = it)) },
                             range = 0..60,
@@ -202,7 +216,7 @@ fun EditRuleScreen(
                             format = { "$it s" },
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Ejercicio de respiración", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.apps_breathing), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                             Switch(
                                 checked = intervention.breathing,
                                 onCheckedChange = { viewModel.setIntervention(intervention.copy(breathing = it)) },
@@ -211,23 +225,23 @@ fun EditRuleScreen(
                     }
                 }
 
-                if (state.features.isNotEmpty()) {
+                if (state.features.isNotEmpty() && !always) {
                     Section(
-                        title = "Dentro de la app",
-                        description = "Bloquea una sección sin bloquear toda la app. Funciona mirando la pantalla, y como las apps cambian, a veces puede fallar.",
+                        title = stringResource(R.string.apps_inside_title),
+                        description = stringResource(R.string.apps_inside_desc),
                     ) {
                         state.features.forEach { entry ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
                                     Text(entry.feature.displayName, style = MaterialTheme.typography.bodyLarge)
                                     Text(
-                                        if (entry.ruleId == null) "Sin configurar" else "Configurada",
+                                        stringResource(if (entry.ruleId == null) R.string.apps_not_set else R.string.apps_set_up),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                                 OutlinedButton(onClick = { viewModel.openFeature(entry, onOpenRule) }) {
-                                    Text(if (entry.ruleId == null) "Bloquear" else "Configurar")
+                                    Text(stringResource(if (entry.ruleId == null) R.string.apps_block else R.string.apps_configure))
                                 }
                             }
                         }
@@ -235,29 +249,28 @@ fun EditRuleScreen(
                 }
 
                 Section(
-                    title = "Modo difícil",
-                    description = "Mientras esta regla esté bloqueando, no podrás cambiarla, apagarla ni borrarla. " +
-                        "Esperas a que termine el bloqueo, como si no hubiera salida. Siempre puedes desinstalar la app.",
+                    title = stringResource(R.string.apps_hard_title),
+                    description = stringResource(R.string.apps_hard_desc),
                     checked = draft.hardMode,
                     onCheckedChange = viewModel::setHardMode,
                 )
 
                 if (state.blockingNow) {
                     Section(
-                        title = "Permiso temporal",
-                        description = "Deja pasar esta app 10 minutos. Reinicia tu racha de días seguidos.",
+                        title = stringResource(R.string.apps_temp_title),
+                        description = stringResource(R.string.apps_temp_desc),
                     ) {
                         OutlinedButton(
                             onClick = {
                                 friction.ask(
-                                    title = "¿Permitir 10 minutos?",
-                                    message = "Esto reinicia tu racha de días seguidos.",
-                                    confirmLabel = "Permitir",
+                                    title = allowTitle,
+                                    message = allowMessage,
+                                    confirmLabel = allowLabel,
                                     onConfirmed = viewModel::allowTemporarily,
                                 )
                             },
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Permitir 10 minutos") }
+                        ) { Text(stringResource(R.string.apps_temp_button)) }
                     }
                 }
 
@@ -270,7 +283,7 @@ fun EditRuleScreen(
                     contentColor = MaterialTheme.colorScheme.error,
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                    Text(if (isFeature) "Quitar esta regla" else "Dejar de controlar esta app")
+                    Text(stringResource(if (isFeature) R.string.apps_remove_rule else R.string.apps_stop_controlling))
                 }
             }
         }
@@ -304,33 +317,36 @@ fun EditRuleScreen(
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
-            title = { Text("¿Descartar los cambios?") },
-            text = { Text("Lo que cambiaste no se ha guardado.") },
-            confirmButton = { TextButton(onClick = onClose) { Text("Descartar") } },
-            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text("Seguir editando") } },
+            title = { Text(stringResource(R.string.apps_discard_title)) },
+            text = { Text(stringResource(R.string.apps_discard_text)) },
+            confirmButton = { TextButton(onClick = onClose) { Text(stringResource(R.string.apps_discard)) } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.apps_keep_editing)) } },
         )
     }
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("¿Quitar ${state.label}?") },
-            text = { Text("Se borrarán sus reglas. Podrás volver a añadirla cuando quieras.") },
+            title = { Text(stringResource(R.string.apps_remove_title, state.label)) },
+            text = { Text(stringResource(R.string.apps_remove_text)) },
             confirmButton = {
+                val askTitle = stringResource(R.string.apps_remove_confirm_title, state.label)
+                val askMessage = stringResource(R.string.apps_remove_confirm_msg)
+                val askLabel = stringResource(R.string.apps_remove)
                 TextButton(
                     onClick = {
                         confirmDelete = false
                         // For now removing a rule does not wait (the user asked for that); a PIN, if set, is still asked.
                         friction.ask(
-                            title = "Quitar ${state.label}",
-                            message = "Dejará de estar protegida.",
-                            confirmLabel = "Quitar",
+                            title = askTitle,
+                            message = askMessage,
+                            confirmLabel = askLabel,
                             wait = false,
                             onConfirmed = viewModel::delete,
                         )
                     },
-                ) { Text("Quitar") }
+                ) { Text(stringResource(R.string.apps_remove)) }
             },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.apps_cancel)) } },
         )
     }
     val notice by viewModel.notice.collectAsStateWithLifecycle()
@@ -347,26 +363,29 @@ private fun LockedNotice(draft: RuleDraft, modifier: Modifier = Modifier) {
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    "Modo difícil activo",
+                    stringResource(R.string.apps_locked_title),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
                 Text(
-                    "Esta regla está bloqueando ahora, así que no se puede cambiar, apagar ni borrar hasta que termine el bloqueo. " +
-                        "Esa es la idea: que el impulso de este momento no pueda con lo que decidiste con calma.",
+                    stringResource(R.string.apps_locked_text),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
             }
         }
-        Text(RuleText.summary(draft), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(RuleText.summary(LocalContext.current, draft), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 private fun BlockSection(draft: RuleDraft, viewModel: EditRuleViewModel, onPick: (TimePick) -> Unit) {
-    Section(title = "Bloqueo") {
-        val options = listOf(BlockMode.NONE to "Libre", BlockMode.ALWAYS to "Siempre", BlockMode.SCHEDULE to "Horario")
+    Section(title = stringResource(R.string.apps_block_title)) {
+        val options = listOf(
+            BlockMode.NONE to stringResource(R.string.apps_mode_free),
+            BlockMode.ALWAYS to stringResource(R.string.apps_mode_always),
+            BlockMode.SCHEDULE to stringResource(R.string.apps_mode_schedule),
+        )
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             options.forEachIndexed { index, (mode, label) ->
                 SegmentedButton(
@@ -377,17 +396,22 @@ private fun BlockSection(draft: RuleDraft, viewModel: EditRuleViewModel, onPick:
             }
         }
         Text(
-            text = when (draft.blockMode) {
-                BlockMode.NONE -> "Sin bloqueo por defecto. Los límites y la pausa de abajo siguen aplicando."
-                BlockMode.ALWAYS -> "No podrás entrar mientras la regla esté activa."
-                BlockMode.SCHEDULE -> "Elige cuándo está bloqueada, o cuándo es el único momento en que puedes usarla."
-            },
+            text = stringResource(
+                when (draft.blockMode) {
+                    BlockMode.NONE -> R.string.apps_mode_free_desc
+                    BlockMode.ALWAYS -> R.string.apps_mode_always_desc
+                    BlockMode.SCHEDULE -> R.string.apps_mode_schedule_desc
+                },
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         if (draft.blockMode == BlockMode.SCHEDULE) {
-            val modes = listOf(ScheduleMode.BLOCK_DURING to "Bloquear en…", ScheduleMode.ALLOW_ONLY_DURING to "Solo permitir en…")
+            val modes = listOf(
+                ScheduleMode.BLOCK_DURING to stringResource(R.string.apps_sched_block),
+                ScheduleMode.ALLOW_ONLY_DURING to stringResource(R.string.apps_sched_allow),
+            )
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 modes.forEachIndexed { index, (mode, label) ->
                     SegmentedButton(
@@ -406,8 +430,8 @@ private fun BlockSection(draft: RuleDraft, viewModel: EditRuleViewModel, onPick:
                     onRemove = { viewModel.removeWindow(index) },
                 )
             }
-            TextButton(onClick = viewModel::addWindow) { Text("Añadir otro horario") }
-            TextButton(onClick = viewModel::useWorkdayPreset) { Text("Usar horario laboral (Lun–Vie, 9–14 y 16–21)") }
+            TextButton(onClick = viewModel::addWindow) { Text(stringResource(R.string.apps_add_window)) }
+            TextButton(onClick = viewModel::useWorkdayPreset) { Text(stringResource(R.string.apps_workday_preset)) }
         }
     }
 }
@@ -428,8 +452,8 @@ private fun WindowCard(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 DayOfWeek.values().forEach { day ->
                     DayToggle(
-                        letter = RuleText.dayLetters.getValue(day),
-                        fullName = RuleText.dayFullNames.getValue(day),
+                        letter = RuleText.dayLetter(day),
+                        fullName = RuleText.dayFullName(day),
                         selected = day in window.days,
                         onToggle = { onToggleDay(day, it) },
                     )
@@ -437,18 +461,18 @@ private fun WindowCard(
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = onPickStart, modifier = Modifier.weight(1f)) {
-                    Text("Desde ${RuleText.clock(window.startMinute)}")
+                    Text(stringResource(R.string.apps_from, RuleText.clock(window.startMinute)))
                 }
                 OutlinedButton(onClick = onPickEnd, modifier = Modifier.weight(1f)) {
-                    Text("Hasta ${RuleText.clock(window.endMinute)}")
+                    Text(stringResource(R.string.apps_until, RuleText.clock(window.endMinute)))
                 }
                 IconButton(onClick = onRemove) {
-                    Icon(Icons.Default.Delete, contentDescription = "Quitar este horario")
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.apps_remove_window))
                 }
             }
             if (window.crossesMidnight) {
                 Text(
-                    "Termina al día siguiente.",
+                    stringResource(R.string.apps_ends_next_day),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

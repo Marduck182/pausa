@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ovl_open_app_title">¿Abrir %1$s?</string>
+    <string name="ovl_take_a_moment">Tómate un momento antes de entrar.</string>
+    <string name="ovl_better_not">Mejor no</string>
+    <string name="ovl_open_app">Abrir %1$s</string>
+    <string name="ovl_open_in">Abrir en %1$d s</string>
+    <plurals name="ovl_allow_minutes">
+        <item quantity="one">Permitir %1$d minuto</item>
+        <item quantity="many">Permitir %1$d minutos</item>
+        <item quantity="other">Permitir %1$d minutos</item>
+    </plurals>
+    <string name="ovl_allow_minutes_in">Permitir %1$d min en %2$d s</string>
+    <string name="ovl_pattern_title">Dibuja tu patrón</string>
+    <string name="ovl_pattern_message">para abrir %1$s</string>
+    <string name="ovl_cancel">Cancelar</string>
+    <string name="ovl_inhale">Inhala</string>
+    <string name="ovl_exhale">Exhala</string>
+    <string name="ovl_done">Listo</string>
+    <string name="ovl_blocked_title_app">%1$s está bloqueada</string>
+    <string name="ovl_blocked_title_feature">%1$s: bloqueado</string>
+    <string name="ovl_back_home">Volver al inicio</string>
+    <string name="ovl_go_home_tab">Ir a Inicio</string>
+    <string name="ovl_feature_in_app">%1$s de %2$s</string>
+</resources>

@@ -54,6 +54,26 @@ class StatsCalculatorTest {
     }
 
     @Test
+    fun `today's attempts per app add openings, blocks and backed out pauses, and leave other days out`() {
+        val sessions = listOf(
+            session(ig, 0, 9, 0, 5), session(ig, 0, 13, 0, 2), // two openings today
+            session(ig, 1, 9, 0, 5),                           // yesterday: not today
+            session(yt, 0, 10, 0, 1),
+        )
+        val events = listOf(
+            event(ig, 0, InterventionOutcome.BLOCKED),
+            event(ig, 0, InterventionOutcome.CANCELLED),
+            event(ig, 0, InterventionOutcome.CONTINUED), // went through the pause: the session already counts it
+            event(ig, 1, InterventionOutcome.BLOCKED),   // yesterday
+            event("com.tiktok", 0, InterventionOutcome.BLOCKED),
+        )
+        val today = compute(RawStats(sessions, events)).attemptsTodayByApp
+        assertEquals(listOf(ig, yt, "com.tiktok"), today.map { it.packageName })
+        assertEquals(listOf(4, 1, 1), today.map { it.attempts })
+        assertEquals(listOf(2, 0, 1), today.map { it.stopped })
+    }
+
+    @Test
     fun `only the last seven days are counted`() {
         val events = listOf(event(ig, 6, InterventionOutcome.BLOCKED), event(ig, 7, InterventionOutcome.BLOCKED))
         assertEquals(1, compute(RawStats(emptyList(), events)).attemptsAvoided)

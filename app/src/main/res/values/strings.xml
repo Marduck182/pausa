@@ -3,5 +3,5 @@
     <string name="app_name">Pausa</string>
 
     <!-- Shown by Android on the system accessibility screen, so it is written for that moment of trust. -->
-    <string name="accessibility_service_description">Pausa usa este servicio solo para saber qué app está en pantalla y mostrarte una pausa o un bloqueo según las reglas que tú creaste. No lee tus mensajes, fotos ni contraseñas, no guarda lo que ves y no puede enviar nada a internet.</string>
+    <string name="accessibility_service_description">Pausa uses this service only to know which app is on screen and to show you a pause or a block according to the rules you created. It does not read your messages, photos or passwords, it does not store what you see and it cannot send anything to the internet.</string>
 </resources>

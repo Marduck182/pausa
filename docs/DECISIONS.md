@@ -74,6 +74,8 @@ sin bibliotecas de imágenes ni de red. Una caché de iconos propia (64 entradas
 
 - Probar en teléfono los bloqueos tras cada reinstalación exige apagar y encender el servicio a mano.
 - La licencia del código no está definida.
+- Solo para depuración, hay que acordarse de que existen: sin espera de confirmación (`Friction.kt`) y descanso de 1 min
+  (`DashboardScreen.kt`), ambos con `BuildConfig.DEBUG`.
 - Decidir dónde se inicia una sesión de concentración: se quitó de Inicio y no hay otro punto de entrada.
 - Verificar con el servicio activo: pantalla de bloqueo/pausa con video sobre otra app, descanso en uso, salida con
   "volver atrás" e icono en la pantalla de inicio.
@@ -124,5 +126,23 @@ Los dos temas ya están portados. Lo que se hizo y por qué:
 - **Descanso:** en Inicio, 10/15/30 min u "Otro tiempo", con cuenta atrás en "Terminar descanso". Es un permiso
   temporal para todas las apps con reglas; no anula las reglas estrictas ni la concentración.
 - **Menos texto en Ajustes** y permisos plegables; la pantalla de bloqueo ya no ofrece "Permitir 10 min".
+- **Estadísticas por intentos, no por minutos.** "Hoy intentaste abrir" cuenta por app: aperturas (sesiones) + bloqueos +
+  pausas canceladas. Una pausa que se atravesó no suma otra vez, porque la sesión que sigue ya la cuenta. Los minutos por
+  app salieron de la pantalla porque se calculaban a partir de sesiones y eran difíciles de explicar; la estimación de
+  "tiempo ahorrado" también.
+- **Con la regla en "Siempre" se ocultan** patrón, tiempo al día, aperturas, pausa y secciones: nunca se alcanzarían. Los
+  valores se conservan en el borrador por si se cambia de modo.
+- **Al terminar un descanso, o terminarlo antes,** la app abierta se vuelve a evaluar (antes se quedaba abierta hasta
+  salir): la sección (Shorts) se vuelve a leer y la pausa se pide otra vez. El chequeo cae justo al vencer el permiso.
+
+## Idiomas
+
+- Inglés por defecto (`res/values`) y español (`res/values-es`); `locales_config.xml` los declara para el selector de
+  idioma por app de Android 13+. Los textos viven en recursos (`strings_*.xml`, con prefijo por pantalla) y, en código sin
+  pantalla, se leen con `Context`: `RuleText`, `BlockText` y los avisos (`RuleMessages`, ids de recurso).
+- Los nombres de día salen de `java.time` con la configuración regional del teléfono.
+- Textos de confirmación (`Friction`) se leen con `friction.text()`/`quantity()`, porque el lint prohíbe leer recursos
+  desde `LocalContext` dentro de las pantallas.
+- Sin traducir a propósito: el Laboratorio, que se quitará. "Shorts" y "Reels" son nombres propios.
 - **Icono nuevo:** esfera y escudo sobre la aurora (adaptativo, con capa monocromática para iconos temáticos).
 - **Costo:** el video pesa 7 MB y gasta algo de batería; Haze exige `minSdk 31` (ya lo es).

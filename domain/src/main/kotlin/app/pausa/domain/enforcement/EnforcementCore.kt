@@ -111,6 +111,13 @@ class EnforcementCore(
     var currentFeature: String? = null
         private set
 
+    /** True when the last [onTick] found that a temporary pass on the current app ended (by time or by being cleared). */
+    var allowEndedOnLastTick: Boolean = false
+        private set
+
+    /** The pass seen on the current app at the last tick, to notice when it is gone. */
+    private var watchedAllow: Pair<String, Instant>? = null
+
     private val interventionPassUntil = mutableMapOf<String, Instant>()
     private val patternPassUntil = mutableMapOf<String, Instant>()
 
@@ -155,7 +162,25 @@ class EnforcementCore(
         if (!acceptingEvents) return EnforcementAction.None
         rollOver(now)
         val app = currentPackage ?: return EnforcementAction.None
-        return evaluate(app, isSessionStart = false, now)
+        val allowEnded = noticeAllowEnd(app, now)
+        val action = evaluate(app, isSessionStart = false, now)
+        if (!allowEnded || action != EnforcementAction.None) return action
+        // A pass or break that ended while the user stayed in the app: what it was skipping applies again, as if the
+        // app had just been opened. A section (Shorts) is looked at again; a pause is asked for again.
+        currentFeature = null
+        val decision = decide(Target.App(app), isSessionStart = true, now)
+        return if (decision is Decision.Intervene) EnforcementAction.ShowIntervention(app, decision.intervention) else EnforcementAction.None
+    }
+
+    /** Whether the temporary pass the current app had at the last look is gone now. Also remembers the pass it sees. */
+    private fun noticeAllowEnd(app: String, now: ZonedDateTime): Boolean {
+        val instant = now.toInstant()
+        val active = temporaryAllows.filter { it.packageName == app && it.until > instant }.maxOfOrNull { it.until }
+        val before = watchedAllow
+        watchedAllow = active?.let { app to it }
+        val ended = before != null && before.first == app && active == null
+        allowEndedOnLastTick = ended
+        return ended
     }
 
     /** The screen went off: the session ends, and coming back to the same app counts as a new one. */
@@ -223,6 +248,12 @@ class EnforcementCore(
         val used = usageSnapshot(now).usedMillis(app)
         val target = Target.App(app)
         var delay = TICK_MILLIS
+        // A pass that runs out is noticed on the second it does, not up to one interval late.
+        for (allow in temporaryAllows) {
+            if (allow.packageName != app) continue
+            val remaining = Duration.between(now.toInstant(), allow.until).toMillis()
+            if (remaining > 0) delay = minOf(delay, remaining + LIMIT_MARGIN_MILLIS)
+        }
         for (rule in rules) {
             if (!rule.enabled || !rule.target.appliesTo(target)) continue
             for (restriction in rule.restrictions) {

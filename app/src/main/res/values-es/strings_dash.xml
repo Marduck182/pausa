@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Inicio -->
+    <string name="dash_end_focus_title">¿Terminar la concentración?</string>
+    <string name="dash_end_focus_message">Terminarla antes reinicia tu racha de días seguidos.</string>
+    <string name="dash_end_focus_confirm">Terminar</string>
+    <string name="dash_break_title">¿Tomar un descanso de %1$d min?</string>
+    <plurals name="dash_break_message">
+        <item quantity="one">Tus apps se abrirán sin espera durante %1$d minuto. Las reglas estrictas y la concentración siguen.</item>
+        <item quantity="many">Tus apps se abrirán sin espera durante %1$d minutos. Las reglas estrictas y la concentración siguen.</item>
+        <item quantity="other">Tus apps se abrirán sin espera durante %1$d minutos. Las reglas estrictas y la concentración siguen.</item>
+    </plurals>
+    <string name="dash_break_confirm">Descansar</string>
+    <string name="dash_privacy_line">Tus datos se quedan en este teléfono. Pausa no tiene permiso de internet.</string>
+    <string name="dash_status_active">Activa</string>
+    <string name="dash_status_off">Apagada</string>
+    <string name="dash_status_not_responding">Sin respuesta</string>
+    <string name="dash_empty_title">Empieza por una app</string>
+    <string name="dash_empty_body">Elige la que más te distrae y decide cuándo y cuánto puedes usarla.</string>
+    <string name="dash_add_app">Añadir una app</string>
+    <string name="dash_caption_focus_until">concentración hasta</string>
+    <string name="dash_caption_blocking_until">enfoque hasta</string>
+    <string name="dash_big_now">Ahora</string>
+    <string name="dash_caption_blocked">bloqueado</string>
+    <string name="dash_caption_next_block">próximo bloqueo</string>
+    <string name="dash_big_free">Libre</string>
+    <string name="dash_caption_no_blocks">sin bloqueos</string>
+    <string name="dash_time_left">Quedan %1$s</string>
+    <string name="dash_next_rest">Próximo descanso a las %1$s</string>
+    <string name="dash_end_early">Terminar antes</string>
+    <string name="dash_more">y %1$d más</string>
+    <string name="dash_facts_left">Te quedan %1$s hoy</string>
+    <string name="dash_facts_used">Hoy usaste %1$s</string>
+    <plurals name="dash_facts_streak">
+        <item quantity="one">%1$d día seguido</item>
+        <item quantity="many">%1$d días seguidos</item>
+        <item quantity="other">%1$d días seguidos</item>
+    </plurals>
+    <plurals name="dash_facts_avoided">
+        <item quantity="one">%1$d apertura evitada esta semana</item>
+        <item quantity="many">%1$d aperturas evitadas esta semana</item>
+        <item quantity="other">%1$d aperturas evitadas esta semana</item>
+    </plurals>
+    <string name="dash_break_heading">Tomar un descanso</string>
+    <string name="dash_break_until">Tus apps se abren sin espera hasta las %1$s.</string>
+    <string name="dash_break_end">Terminar descanso</string>
+    <string name="dash_break_intro">Elige cuánto y tus apps se abren sin esperar. Las reglas estrictas y la concentración siguen en pie.</string>
+    <string name="dash_break_other">Otro tiempo</string>
+    <string name="dash_break_how_long">¿Cuánto descansas?</string>
+    <string name="dash_break_duration">Duración</string>
+    <string name="dash_cancel">Cancelar</string>
+    <string name="dash_stalled_title">Pausa no está respondiendo</string>
+    <string name="dash_stalled_body">Está activada en Ajustes, pero el sistema la dejó sin conectar y ahora no bloquea nada. Apágala y vuelve a encenderla para que funcione otra vez.</string>
+    <string name="dash_open_accessibility">Abrir ajustes de accesibilidad</string>
+    <string name="dash_setup_title">Falta activar Pausa</string>
+    <string name="dash_setup_body">Sin su servicio de accesibilidad no sabe qué app tienes abierta y no puede bloquear nada. Solo mira qué app está en pantalla: no lee tus mensajes ni guarda lo que ves.</string>
+    <string name="dash_switch_grey">El interruptor sale gris</string>
+    <string name="dash_restricted_note">Android bloquea este permiso en apps instaladas fuera de la tienda. En la info de la app, toca ⋮ y elige «Permitir ajustes restringidos».</string>
+
+    <!-- Estadísticas -->
+    <string name="stats_title">Cómo vas</string>
+    <string name="stats_streak_title">Racha</string>
+    <plurals name="stats_streak_unit">
+        <item quantity="one">día</item>
+        <item quantity="many">días</item>
+        <item quantity="other">días</item>
+    </plurals>
+    <string name="stats_streak_start">Empiezas hoy</string>
+    <plurals name="stats_streak_days">
+        <item quantity="one">%1$d día seguido</item>
+        <item quantity="many">%1$d días seguidos</item>
+        <item quantity="other">%1$d días seguidos</item>
+    </plurals>
+    <plurals name="stats_best_streak">
+        <item quantity="one">Tu mejor racha fue de %1$d día.</item>
+        <item quantity="many">Tu mejor racha fue de %1$d días.</item>
+        <item quantity="other">Tu mejor racha fue de %1$d días.</item>
+    </plurals>
+    <string name="stats_week_title">Esta semana</string>
+    <string name="stats_week_empty">Aún no hay nada que contar.</string>
+    <plurals name="stats_avoided_description">
+        <item quantity="one">Evitaste %1$d apertura</item>
+        <item quantity="many">Evitaste %1$d aperturas</item>
+        <item quantity="other">Evitaste %1$d aperturas</item>
+    </plurals>
+    <plurals name="stats_avoided_label">
+        <item quantity="one">apertura evitada</item>
+        <item quantity="many">aperturas evitadas</item>
+        <item quantity="other">aperturas evitadas</item>
+    </plurals>
+    <plurals name="stats_blocks">
+        <item quantity="one">%1$d bloqueo</item>
+        <item quantity="many">%1$d bloqueos</item>
+        <item quantity="other">%1$d bloqueos</item>
+    </plurals>
+    <plurals name="stats_pauses">
+        <item quantity="one">%1$d pausa</item>
+        <item quantity="many">%1$d pausas</item>
+        <item quantity="other">%1$d pausas</item>
+    </plurals>
+    <string name="stats_and">" y "</string>
+    <string name="stats_today_title">Hoy intentaste abrir</string>
+    <string name="stats_today_empty">Aún no has intentado abrir ninguna.</string>
+    <plurals name="stats_times">
+        <item quantity="one">%1$d vez</item>
+        <item quantity="many">%1$d veces</item>
+        <item quantity="other">%1$d veces</item>
+    </plurals>
+    <string name="stats_attempts_description">%1$s: %2$s</string>
+    <plurals name="stats_stopped_count">
+        <item quantity="one">%1$d frenada por Pausa</item>
+        <item quantity="many">%1$d frenadas por Pausa</item>
+        <item quantity="other">%1$d frenadas por Pausa</item>
+    </plurals>
+    <string name="stats_stopped_detail">Pausa frenó %1$s.</string>
+    <string name="stats_hours_title">A qué hora te distraes más</string>
+    <string name="stats_hours_peak">Sobre todo entre las %1$s y las %2$s.</string>
+    <string name="stats_hours_hide">Ocultar las horas</string>
+    <string name="stats_hours_show">Ver todas las horas</string>
+    <string name="stats_hours_chart_description">Uso por hora del día; el máximo es a las %1$s</string>
+    <string name="stats_hour_axis">%1$d h</string>
+</resources>

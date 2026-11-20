@@ -1,5 +1,8 @@
 package app.pausa.ui.apps
 
+import dagger.hilt.android.qualifiers.ApplicationContext
+import app.pausa.R
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,7 +45,7 @@ data class ControlledAppItem(
     val label: String,
     val enabled: Boolean,
     val summary: String,
-    /** What was used today next to the limit, like "Hoy: 12 de 30 min"; null if there is nothing to say yet. */
+    /** What was used today next to the limit, like "Today: 12 of 30 min"; null if there is nothing to say yet. */
     val usageToday: String?,
     /** Hard mode and blocking right now: it cannot be turned off until the block ends. */
     val locked: Boolean,
@@ -62,12 +65,13 @@ class AppsViewModel @Inject constructor(
     private val stats: StatsRepository,
     private val locks: RuleLockChecker,
     private val clock: Clock,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    private val _notice = MutableStateFlow<String?>(null)
+    private val _notice = MutableStateFlow<Int?>(null)
 
     /** Why the last action was not done, or null. Shown in a dialog until the person dismisses it. */
-    val notice: StateFlow<String?> = _notice.asStateFlow()
+    val notice: StateFlow<Int?> = _notice.asStateFlow()
 
     fun dismissNotice() {
         _notice.value = null
@@ -107,11 +111,11 @@ class AppsViewModel @Inject constructor(
                         label = if (target is Target.Feature) "${FeatureCatalog.displayName(target.featureId)} · $app" else app,
                         enabled = rule.enabled,
                         summary = if (rule.unreadable) {
-                            "No se pudo leer esta regla. Se bloquea hasta que la configures de nuevo."
+                            context.getString(R.string.apps_unreadable)
                         } else {
-                            RuleText.summary(draft)
+                            RuleText.summary(context, draft)
                         },
-                        usageToday = if (target is Target.App) RuleText.usageToday(draft, usage[rule.target.packageName]) else null,
+                        usageToday = if (target is Target.App) RuleText.usageToday(context, draft, usage[rule.target.packageName]) else null,
                         locked = RuleLock.isLocked(rule, snapshot, now),
                     )
                 }

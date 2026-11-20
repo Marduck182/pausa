@@ -1,5 +1,6 @@
 package app.pausa.ui.settings
 
+import app.pausa.R
 import app.pausa.domain.model.BlockExit
 import app.pausa.domain.model.ThemeMode
 import android.util.Log
@@ -28,10 +29,10 @@ class SettingsViewModel @Inject constructor(
     private val locks: RuleLockChecker,
 ) : ViewModel() {
 
-    private val _notice = MutableStateFlow<String?>(null)
+    private val _notice = MutableStateFlow<Int?>(null)
 
     /** Why the last action was not done, or null. Shown in a dialog until the person dismisses it. */
-    val notice: StateFlow<String?> = _notice.asStateFlow()
+    val notice: StateFlow<Int?> = _notice.asStateFlow()
 
     fun dismissNotice() {
         _notice.value = null
@@ -80,7 +81,7 @@ class SettingsViewModel @Inject constructor(
             try {
                 // Erasing deletes every rule: while one is protecting the person right now, it would be a way around it.
                 if (locks.isAnyProtectionActive()) {
-                    _notice.value = "Hay una concentración o un bloqueo estricto en curso. Podrás borrar todo cuando termine."
+                    _notice.value = R.string.settings_notice_erase_blocked
                     return@launch
                 }
                 eraser.eraseAll()

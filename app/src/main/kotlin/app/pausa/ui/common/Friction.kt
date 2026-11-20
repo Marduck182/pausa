@@ -1,5 +1,12 @@
 package app.pausa.ui.common
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.annotation.StringRes
+import androidx.annotation.PluralsRes
+import android.content.res.Resources
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
+import app.pausa.BuildConfig
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,7 +63,13 @@ class Friction internal constructor(
     internal val cooldownSeconds: Int,
     internal val pinRequired: Boolean,
     internal val verifyPin: suspend (String) -> Boolean,
+    private val resources: Resources,
 ) {
+    /** Text for the confirmation, in the language the screen is in now. */
+    fun text(@StringRes id: Int, vararg args: Any): String = resources.getString(id, *args)
+
+    fun quantity(@PluralsRes id: Int, count: Int, vararg args: Any): String = resources.getQuantityString(id, count, *args)
+
     internal class Pending(
         val title: String,
         val message: String,
@@ -81,8 +94,11 @@ class Friction internal constructor(
 @Composable
 fun rememberFriction(viewModel: FrictionViewModel = hiltViewModel()): Friction {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
-    return remember(settings.cooldownSeconds, settings.pinEnabled, viewModel) {
-        Friction(settings.cooldownSeconds, settings.pinEnabled, viewModel::verifyPin)
+    // TEMPORARY, for testing rules on a phone: debug builds skip the wait. Release builds keep the user's setting.
+    val cooldown = if (BuildConfig.DEBUG) 0 else settings.cooldownSeconds
+    val resources = LocalContext.current.resources
+    return remember(cooldown, settings.pinEnabled, viewModel, resources) {
+        Friction(cooldown, settings.pinEnabled, viewModel::verifyPin, resources)
     }
 }
 
@@ -123,13 +139,13 @@ fun Friction.Dialog() {
                     OutlinedTextField(
                         value = pin,
                         onValueChange = { text -> if (text.length <= 8 && text.all(Char::isDigit)) { pin = text; wrong = false } },
-                        label = { Text("PIN") },
+                        label = { Text(stringResource(R.string.fric_pin_label)) },
                         singleLine = true,
                         isError = wrong,
                         supportingText = {
                             when {
-                                lockedSeconds > 0 -> Text("Demasiados intentos. Espera $lockedSeconds s.")
-                                wrong -> Text("PIN incorrecto.")
+                                lockedSeconds > 0 -> Text(stringResource(R.string.fric_too_many_attempts, lockedSeconds))
+                                wrong -> Text(stringResource(R.string.fric_wrong_pin))
                             }
                         },
                         visualTransformation = PasswordVisualTransformation(),
@@ -139,7 +155,7 @@ fun Friction.Dialog() {
                 }
                 if (remaining > 0) {
                     Text(
-                        "Respira. Podrás continuar en $remaining s.",
+                        stringResource(R.string.fric_breathe, remaining),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -178,7 +194,7 @@ fun Friction.Dialog() {
                 },
             ) { Text(request.confirmLabel) }
         },
-        dismissButton = { TextButton(onClick = { pending = null }) { Text("Mejor no") } },
+        dismissButton = { TextButton(onClick = { pending = null }) { Text(stringResource(R.string.fric_better_not)) } },
     )
 }
 

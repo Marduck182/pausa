@@ -1,5 +1,8 @@
 package app.pausa.ui
 
+import androidx.annotation.StringRes
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import app.pausa.ui.theme.LocalDarkTheme
 import app.pausa.ui.common.glassSurface
@@ -64,12 +67,12 @@ import app.pausa.ui.settings.SettingsScreen
 import app.pausa.ui.stats.StatsScreen
 
 /** The screens reachable from the main navigation. Everything else (picker, editor, exceptions) is a step inside one. */
-private enum class Destination(val route: String, val label: String, val icon: ImageVector) {
-    Home("home", "Inicio", Icons.Default.Home),
-    Apps("apps", "Apps", Icons.Default.Menu),
-    Stats("stats", "Estadísticas", Icons.Default.Info),
-    Settings("settings", "Ajustes", Icons.Default.Settings),
-    Lab("lab", "Lab", Icons.Default.Build),
+private enum class Destination(val route: String, @StringRes val label: Int, val icon: ImageVector) {
+    Home("home", R.string.ui_nav_home, Icons.Default.Home),
+    Apps("apps", R.string.ui_nav_apps, Icons.Default.Menu),
+    Stats("stats", R.string.ui_nav_stats, Icons.Default.Info),
+    Settings("settings", R.string.ui_nav_settings, Icons.Default.Settings),
+    Lab("lab", R.string.ui_nav_lab, Icons.Default.Build),
 }
 
 private object Routes {
@@ -191,8 +194,8 @@ private fun SideRail(destinations: List<Destination>, currentRoute: String?, onS
             NavigationRailItem(
                 selected = currentRoute == destination.route,
                 onClick = { onSelect(destination.route) },
-                icon = { Icon(destination.icon, contentDescription = destination.label) },
-                label = { Text(destination.label) },
+                icon = { Icon(destination.icon, contentDescription = stringResource(destination.label)) },
+                label = { Text(stringResource(destination.label)) },
                 alwaysShowLabel = false,
             )
         }
@@ -224,7 +227,7 @@ private fun GlassDock(destinations: List<Destination>, currentRoute: String?, on
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Icon(destination.icon, contentDescription = null, tint = ink)
-                    Text(destination.label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp, letterSpacing = 0.sp), color = ink, maxLines = 1, softWrap = false)
+                    Text(stringResource(destination.label), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp, letterSpacing = 0.sp), color = ink, maxLines = 1, softWrap = false)
                 }
             }
         }

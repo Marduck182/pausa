@@ -22,7 +22,10 @@ Reels de Instagram). Todo ocurre en el teléfono: sin cuenta, sin permiso de int
 - **Seguridad contra el impulso.** PIN y patrón opcionales (guardados solo como hash con sal), espera antes de
   apagar una regla y modo difícil: una regla que está bloqueando no se puede cambiar hasta que termine.
 - **Patrón por app.** Puede pedir tu patrón de seguridad antes de abrir una app.
-- **Estadísticas locales,** sin gráficas que abrumen: racha, aperturas evitadas, tiempo por app.
+- **Estadísticas locales,** sin gráficas que abrumen: racha, aperturas evitadas y, por app, las veces que intentaste
+  abrirla hoy (abierta, bloqueada o con la pausa cancelada). No muestran minutos de uso por app.
+- **Inglés y español.** Sigue el idioma del teléfono y, si no es uno de los dos, usa inglés. La pestaña Laboratorio
+  (de depuración) sigue en español.
 
 ## Privacidad
 
@@ -75,6 +78,8 @@ de la app, toca ⋮ y elige «Permitir ajustes restringidos» (Android lo pide c
   del teléfono.
 - Si Android detiene el servicio, se recupera la sesión hasta la última anotación (cada 30 s), no hasta el instante exacto.
 - El video de fondo cuesta algo de batería; se pausa cuando la app sale de pantalla.
+- Las compilaciones de depuración quitan la espera de confirmación y ofrecen un descanso de 1 minuto, para probar reglas
+  en el teléfono. La versión final no lo hace.
 - Algunos fabricantes cierran los servicios en segundo plano; en Samsung conviene quitar Pausa de las apps en suspensión.
 
 ## Licencias

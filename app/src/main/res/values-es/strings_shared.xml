@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_got_it">Entendido</string>
+    <string name="msg_rule_locked">Esta regla está en modo estricto y bloqueando ahora. No se puede cambiar hasta que termine el bloqueo.</string>
+    <string name="msg_save_failed">No se pudo guardar el cambio. Inténtalo de nuevo.</string>
+
+    <string name="rule_tomorrow_at">mañana %1$s</string>
+    <string name="rule_brief_always">siempre</string>
+    <string name="rule_brief_until">hasta %1$s</string>
+    <string name="rule_brief_now">ahora</string>
+    <string name="rule_brief_daily_limit">límite de hoy</string>
+    <string name="rule_brief_session_limit">aperturas de hoy</string>
+    <string name="rule_every_day">Todos los días</string>
+    <string name="rule_weekdays">Lun–Vie</string>
+    <string name="rule_weekend">Fin de semana</string>
+    <string name="rule_always_blocked">Siempre bloqueada</string>
+    <string name="rule_blocked">Bloqueada</string>
+    <string name="rule_only_allowed">Solo permitida</string>
+    <string name="rule_minutes_a_day">%1$d min al día</string>
+    <string name="rule_asks_pattern">pide patrón</string>
+    <string name="rule_pause_seconds">pausa de %1$d s</string>
+    <string name="rule_no_restrictions">Sin restricciones</string>
+    <string name="rule_minutes_of">%1$d de %2$d min</string>
+    <string name="rule_today">Hoy: %1$s</string>
+    <plurals name="rule_max_openings">
+        <item quantity="one">máx. %1$d apertura al día</item>
+        <item quantity="many">máx. %1$d aperturas al día</item>
+        <item quantity="other">máx. %1$d aperturas al día</item>
+    </plurals>
+    <plurals name="rule_openings_of">
+        <item quantity="one">%1$d de %2$d apertura</item>
+        <item quantity="many">%1$d de %2$d aperturas</item>
+        <item quantity="other">%1$d de %2$d aperturas</item>
+    </plurals>
+    <plurals name="rule_openings">
+        <item quantity="one">%1$d apertura</item>
+        <item quantity="many">%1$d aperturas</item>
+        <item quantity="other">%1$d aperturas</item>
+    </plurals>
+
+    <string name="block_by_rule">Bloqueada por tu regla.</string>
+    <string name="block_available">Podrás usarla %1$s.</string>
+    <string name="block_at_time">a las %1$s</string>
+    <string name="block_tomorrow_at">mañana a las %1$s</string>
+    <string name="block_on_day_at">el %1$s a las %2$s</string>
+    <string name="block_daily_limit">Llegaste a tu límite de hoy. Mañana vuelve.</string>
+    <string name="block_session_limit">Ya usaste las aperturas de hoy.</string>
+    <string name="block_focus_until">Concentración hasta las %1$s.</string>
+    <string name="block_focus">En concentración.</string>
+</resources>

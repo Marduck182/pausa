@@ -1,5 +1,6 @@
 package app.pausa.ui.settings
 
+import app.pausa.R
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,10 +37,10 @@ class ExceptionsViewModel @Inject constructor(
     systemPackages: SystemPackages,
 ) : ViewModel() {
 
-    private val _notice = MutableStateFlow<String?>(null)
+    private val _notice = MutableStateFlow<Int?>(null)
 
     /** Why the last action was not done, or null. Shown in a dialog until the person dismisses it. */
-    val notice: StateFlow<String?> = _notice.asStateFlow()
+    val notice: StateFlow<Int?> = _notice.asStateFlow()
 
     fun dismissNotice() {
         _notice.value = null
@@ -79,7 +80,7 @@ class ExceptionsViewModel @Inject constructor(
             try {
                 // An exception lets an app through, so it waits while a focus session or a strict block is on.
                 if (allowed && locks.isAnyProtectionActive()) {
-                    _notice.value = "Hay una concentración o un bloqueo estricto en curso. Las excepciones se pueden añadir cuando termine."
+                    _notice.value = R.string.exc_notice_blocked
                     return@launch
                 }
                 // One atomic change: two quick toggles must not overwrite each other with a stale copy of the set.

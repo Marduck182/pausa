@@ -1,5 +1,6 @@
 package app.pausa.enforcement
 
+import app.pausa.R
 import app.pausa.domain.model.BlockExit
 import android.accessibilityservice.AccessibilityService
 import android.content.BroadcastReceiver
@@ -160,7 +161,13 @@ class GuardAccessibilityService : AccessibilityService() {
                     core.patternAvailable = it.patternEnabled
                 }
             }
-            launch { keepCollecting("temporary passes", settingsRepository.temporaryAllows) { core.temporaryAllows = it } }
+            launch {
+                keepCollecting("temporary passes", settingsRepository.temporaryAllows) {
+                    core.temporaryAllows = it
+                    // Ending a break early should bring the rules back now, not at the next check.
+                    if (!overlay.isShowing) tickAndRecheck()
+                }
+            }
             launch {
                 keepCollecting("focus", settingsRepository.focus) { focus ->
                     core.focus = focus
@@ -177,7 +184,7 @@ class GuardAccessibilityService : AccessibilityService() {
                     delay(core.nextCheckDelayMillis(now()))
                     if (!overlay.isShowing) {
                         reconcileForeground()
-                        handle(core.onTick(now()))
+                        tickAndRecheck()
                     }
                     refreshSystemPackagesIfDue()
                     writeCheckpointIfDue()
@@ -302,6 +309,12 @@ class GuardAccessibilityService : AccessibilityService() {
 
     // --- Acting on decisions -----------------------------------------------------------------------------------
 
+    /** The periodic check. When a pass or break just ended, the section on screen (Shorts) is read again. */
+    private fun tickAndRecheck() {
+        handle(core.onTick(now()))
+        if (core.allowEndedOnLastTick) core.currentPackage?.let { requestFeatureScan(it) }
+    }
+
     private fun handle(action: EnforcementAction) {
         when (action) {
             EnforcementAction.None -> Unit
@@ -310,7 +323,7 @@ class GuardAccessibilityService : AccessibilityService() {
             is EnforcementAction.ShowBlock -> {
                 val shown = showBlock(
                     packageName = action.packageName,
-                    message = BlockText.describe(action.block, now(), action.featureId),
+                    message = BlockText.describe(this, action.block, now(), action.featureId),
                     featureId = action.featureId,
                 )
                 // Only a block the person actually saw counts in the statistics.
@@ -370,9 +383,13 @@ class GuardAccessibilityService : AccessibilityService() {
         return present(packageName, onBack = dismiss) {
             BlockContent(
                 packageName = packageName,
-                title = if (featureId == null) "${labelFor(packageName, null)} está bloqueada" else "${labelFor(packageName, featureId)}: bloqueado",
+                title = if (featureId == null) {
+                    getString(R.string.ovl_blocked_title_app, labelFor(packageName, null))
+                } else {
+                    getString(R.string.ovl_blocked_title_feature, labelFor(packageName, featureId))
+                },
                 message = message,
-                dismissLabel = if (featureId == null) "Volver al inicio" else "Ir a Inicio",
+                dismissLabel = getString(if (featureId == null) R.string.ovl_back_home else R.string.ovl_go_home_tab),
                 onDismiss = dismiss,
                 // A pass for one app from here is gone: the way to rest is a break, chosen in advance on the home screen.
                 temporaryAllowMinutes = null,
@@ -454,7 +471,7 @@ class GuardAccessibilityService : AccessibilityService() {
         val app = runCatching {
             packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0)).toString()
         }.getOrDefault(packageName)
-        return if (featureId == null) app else "${FeatureCatalog.displayName(featureId)} de $app"
+        return if (featureId == null) app else getString(R.string.ovl_feature_in_app, FeatureCatalog.displayName(featureId), app)
     }
 
     /**
@@ -490,7 +507,7 @@ class GuardAccessibilityService : AccessibilityService() {
                 packageName = packageName,
                 title = title,
                 message = message,
-                dismissLabel = "Entendido",
+                dismissLabel = getString(R.string.common_got_it),
                 onDismiss = overlay::hide,
                 temporaryAllowMinutes = null,
                 waitSeconds = 0,

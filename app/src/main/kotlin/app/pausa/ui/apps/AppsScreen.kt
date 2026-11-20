@@ -1,5 +1,7 @@
 package app.pausa.ui.apps
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
 import app.pausa.ui.common.Switch
 import app.pausa.ui.common.FilledTonalButton
 import app.pausa.ui.common.NoticeDialog
@@ -58,14 +60,14 @@ fun AppsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                "Apps",
+                stringResource(R.string.apps_title),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.weight(1f).semantics { heading() },
             )
             if (!state.loading && state.items.isNotEmpty()) {
                 FilledTonalButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp)) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                    Text("Añadir app")
+                    Text(stringResource(R.string.apps_add))
                 }
             }
         }
@@ -73,9 +75,9 @@ fun AppsScreen(
             when {
                 state.loading -> SkeletonRows()
                 state.items.isEmpty() -> EmptyState(
-                    title = "Nada controlado todavía",
-                    body = "Añade la app que más te distrae. Después eliges cuándo se bloquea y cuánto puedes usarla.",
-                    actionLabel = "Añadir una app",
+                    title = stringResource(R.string.apps_empty_title),
+                    body = stringResource(R.string.apps_empty_body),
+                    actionLabel = stringResource(R.string.apps_empty_action),
                     onAction = onAdd,
                     modifier = Modifier.padding(bottom = 24.dp),
                 )
@@ -83,6 +85,10 @@ fun AppsScreen(
                     contentPadding = PaddingValues(bottom = 24.dp),
                 ) {
                     items(state.items, key = { it.ruleId }) { item ->
+                        val controlLabel = stringResource(R.string.apps_control_desc, item.label)
+                        val offTitle = stringResource(R.string.apps_off_title, item.label)
+                        val offMessage = stringResource(R.string.apps_off_msg)
+                        val offLabel = stringResource(R.string.apps_off)
                         AppRow(
                             packageName = item.packageName,
                             title = item.label,
@@ -90,11 +96,11 @@ fun AppsScreen(
                             supporting = {
                                 Supporting(item.summary)
                                 if (item.usageToday != null) Supporting(item.usageToday, emphasis = true)
-                                if (item.locked) Supporting("Modo difícil: no se puede cambiar ahora", emphasis = true)
+                                if (item.locked) Supporting(stringResource(R.string.apps_locked_row), emphasis = true)
                             },
                             trailing = {
                                 Switch(
-                                    modifier = Modifier.semantics { contentDescription = "Controlar ${item.label}" },
+                                    modifier = Modifier.semantics { contentDescription = controlLabel },
                                     checked = item.enabled,
                                     enabled = !item.locked,
                                     onCheckedChange = { enabled ->
@@ -103,9 +109,9 @@ fun AppsScreen(
                                             viewModel.setEnabled(item.ruleId, true)
                                         } else {
                                             friction.ask(
-                                                title = "¿Apagar ${item.label}?",
-                                                message = "Dejará de estar protegida hasta que la vuelvas a encender.",
-                                                confirmLabel = "Apagar",
+                                                title = offTitle,
+                                                message = offMessage,
+                                                confirmLabel = offLabel,
                                             ) { viewModel.setEnabled(item.ruleId, false) }
                                         }
                                     },

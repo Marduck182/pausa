@@ -84,6 +84,43 @@ class EnforcementCoreFocusAndFeatureTest {
         assertTrue(core.onWindowChanged(instagram, at(10, 2)) is EnforcementAction.ShowBlock)
     }
 
+    @Test
+    fun `when a break ends inside a section, the section is blocked on the next tick`() {
+        core.rules = listOf(rule(shorts, Restriction.AlwaysBlock))
+        core.temporaryAllows = listOf(TemporaryAllow(youtube, at(10, 10).toInstant()))
+        core.onWindowChanged(youtube, at(10))
+        // During the break the section is let through.
+        assertEquals(EnforcementAction.None, core.onFeatureDetected(youtube, FeatureIds.YOUTUBE_SHORTS, at(10, 1)))
+        assertEquals(EnforcementAction.None, core.onTick(at(10, 5)))
+        assertFalse(core.allowEndedOnLastTick)
+
+        // The pass ran out while the user stayed in Shorts: nothing says it is a new entry, so the tick does.
+        assertEquals(EnforcementAction.None, core.onTick(at(10, 11)))
+        assertTrue(core.allowEndedOnLastTick)
+        assertTrue(core.onFeatureDetected(youtube, FeatureIds.YOUTUBE_SHORTS, at(10, 11)) is EnforcementAction.ShowBlock)
+    }
+
+    @Test
+    fun `ending a break early brings a pause back for the app that is open`() {
+        core.rules = listOf(rule(Target.App(instagram), Restriction.Intervention()))
+        core.temporaryAllows = listOf(TemporaryAllow(instagram, at(10, 30).toInstant()))
+        core.onWindowChanged(instagram, at(10))
+        assertEquals(EnforcementAction.None, core.onTick(at(10, 1)))
+
+        core.temporaryAllows = emptyList() // "Terminar descanso"
+        assertTrue(core.onTick(at(10, 2)) is EnforcementAction.ShowIntervention)
+        // It is asked once: the next tick, with no pass either way, does not ask again.
+        assertEquals(EnforcementAction.None, core.onTick(at(10, 3)))
+    }
+
+    @Test
+    fun `the next check waits no longer than the end of a pass`() {
+        core.rules = listOf(rule(Target.App(instagram), Restriction.AlwaysBlock))
+        core.temporaryAllows = listOf(TemporaryAllow(instagram, at(10, 0).toInstant().plusSeconds(4)))
+        core.onWindowChanged(instagram, at(10))
+        assertTrue(core.nextCheckDelayMillis(at(10)) in 4_000L..4_500L)
+    }
+
     // ---- features
 
     private val shorts = Target.Feature(youtube, FeatureIds.YOUTUBE_SHORTS)

@@ -2,6 +2,9 @@
 
 package app.pausa.ui.settings
 
+import app.pausa.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import app.pausa.ui.common.Switch
 import app.pausa.ui.common.NoticeDialog
 import androidx.compose.foundation.layout.Arrangement
@@ -43,13 +46,14 @@ fun ExceptionsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val friction = rememberFriction()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Excepciones", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(R.string.exc_title), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.exc_back)) }
                 },
             )
         },
@@ -62,7 +66,7 @@ fun ExceptionsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                "Las apps que actives aquí pasan todos los bloqueos y las concentraciones. Mejor pocas.",
+                stringResource(R.string.exc_intro),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -71,7 +75,7 @@ fun ExceptionsScreen(
                 onValueChange = viewModel::setQuery,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Buscar") },
+                placeholder = { Text(stringResource(R.string.exc_search)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             )
             if (state.loading) {
@@ -83,16 +87,17 @@ fun ExceptionsScreen(
                             packageName = row.app.packageName,
                             title = row.app.label,
                             trailing = {
+                                val allowDescription = stringResource(R.string.exc_allow_description, row.app.label)
                                 Switch(
-                                    modifier = Modifier.semantics { contentDescription = "Dejar pasar ${row.app.label}" },
+                                    modifier = Modifier.semantics { contentDescription = allowDescription },
                                     checked = row.allowed,
                                     onCheckedChange = { allow ->
                                         // Letting an app through weakens the protection, so it takes a pause; removing one does not.
                                         if (allow) {
                                             friction.ask(
-                                                title = "¿Dejar pasar ${row.app.label}?",
-                                                message = "Ningún bloqueo ni concentración le afectará.",
-                                                confirmLabel = "Permitir",
+                                                title = friction.text(R.string.exc_confirm_title, row.app.label),
+                                                message = friction.text(R.string.exc_confirm_message),
+                                                confirmLabel = friction.text(R.string.exc_allow),
                                             ) { viewModel.setAllowed(row.app.packageName, true) }
                                         } else {
                                             viewModel.setAllowed(row.app.packageName, false)

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lista de apps, editor de reglas, selector de apps -->
+    <string name="apps_back">Volver</string>
+    <string name="apps_save">Guardar</string>
+    <string name="apps_cancel">Cancelar</string>
+    <string name="apps_remove">Quitar</string>
+
+    <string name="apps_title">Apps</string>
+    <string name="apps_add">Añadir app</string>
+    <string name="apps_empty_title">Nada controlado todavía</string>
+    <string name="apps_empty_body">Añade la app que más te distrae. Después eliges cuándo se bloquea y cuánto puedes usarla.</string>
+    <string name="apps_empty_action">Añadir una app</string>
+    <string name="apps_locked_row">Modo difícil: no se puede cambiar ahora</string>
+    <string name="apps_control_desc">Controlar %1$s</string>
+    <string name="apps_off_title">¿Apagar %1$s?</string>
+    <string name="apps_off_msg">Dejará de estar protegida hasta que la vuelvas a encender.</string>
+    <string name="apps_off">Apagar</string>
+    <string name="apps_unreadable">No se pudo leer esta regla. Se bloquea hasta que la configures de nuevo.</string>
+
+    <string name="pick_title">Elige una app</string>
+    <string name="pick_search">Buscar</string>
+    <string name="pick_all_controlled">Ya controlas todas tus apps.</string>
+    <string name="pick_no_match">Ninguna app se llama así.</string>
+
+    <string name="apps_save_title">¿Guardar estos cambios?</string>
+    <string name="apps_save_msg_blocking">Esta regla está bloqueando ahora mismo.</string>
+    <string name="apps_save_msg_pattern">Vas a quitar el patrón de esta app.</string>
+    <string name="apps_save_msg_off">Vas a apagar esta regla.</string>
+
+    <string name="apps_controlled_title">Controlada</string>
+    <string name="apps_controlled_desc">Si la apagas, Pausa ignora esto sin borrar tus reglas.</string>
+    <string name="apps_pattern_title">Pedir patrón para entrar</string>
+    <string name="apps_pattern_desc">Antes de abrir la app tendrás que dibujar tu patrón de seguridad. Un permiso temporal no lo salta.</string>
+    <string name="apps_daily_title">Tiempo al día</string>
+    <string name="apps_daily_desc">Se bloquea al llegar al límite y vuelve mañana.</string>
+    <string name="apps_max">Máximo</string>
+    <string name="apps_openings_title">Aperturas al día</string>
+    <string name="apps_openings_desc">Cuántas veces puedes abrirla. Una sesión ya abierta no se corta.</string>
+    <string name="apps_pause_title_feature">Pausa al entrar</string>
+    <string name="apps_pause_title_app">Pausa antes de abrir</string>
+    <string name="apps_pause_desc">Unos segundos para decidir si de verdad quieres entrar.</string>
+    <string name="apps_wait">Espera</string>
+    <string name="apps_breathing">Ejercicio de respiración</string>
+    <string name="apps_inside_title">Dentro de la app</string>
+    <string name="apps_inside_desc">Bloquea una sección sin bloquear toda la app. Funciona mirando la pantalla, y como las apps cambian, a veces puede fallar.</string>
+    <string name="apps_not_set">Sin configurar</string>
+    <string name="apps_set_up">Configurada</string>
+    <string name="apps_block">Bloquear</string>
+    <string name="apps_configure">Configurar</string>
+    <string name="apps_hard_title">Modo difícil</string>
+    <string name="apps_hard_desc">Mientras esta regla esté bloqueando, no podrás cambiarla, apagarla ni borrarla. Esperas a que termine el bloqueo, como si no hubiera salida. Siempre puedes desinstalar la app.</string>
+    <string name="apps_temp_title">Permiso temporal</string>
+    <string name="apps_temp_desc">Deja pasar esta app 10 minutos. Reinicia tu racha de días seguidos.</string>
+    <string name="apps_temp_confirm_title">¿Permitir 10 minutos?</string>
+    <string name="apps_temp_confirm_msg">Esto reinicia tu racha de días seguidos.</string>
+    <string name="apps_temp_confirm">Permitir</string>
+    <string name="apps_temp_button">Permitir 10 minutos</string>
+    <string name="apps_remove_rule">Quitar esta regla</string>
+    <string name="apps_stop_controlling">Dejar de controlar esta app</string>
+
+    <string name="apps_discard_title">¿Descartar los cambios?</string>
+    <string name="apps_discard_text">Lo que cambiaste no se ha guardado.</string>
+    <string name="apps_discard">Descartar</string>
+    <string name="apps_keep_editing">Seguir editando</string>
+    <string name="apps_remove_title">¿Quitar %1$s?</string>
+    <string name="apps_remove_text">Se borrarán sus reglas. Podrás volver a añadirla cuando quieras.</string>
+    <string name="apps_remove_confirm_title">Quitar %1$s</string>
+    <string name="apps_remove_confirm_msg">Dejará de estar protegida.</string>
+
+    <string name="apps_locked_title">Modo difícil activo</string>
+    <string name="apps_locked_text">Esta regla está bloqueando ahora, así que no se puede cambiar, apagar ni borrar hasta que termine el bloqueo. Esa es la idea: que el impulso de este momento no pueda con lo que decidiste con calma.</string>
+
+    <string name="apps_block_title">Bloqueo</string>
+    <string name="apps_mode_free">Libre</string>
+    <string name="apps_mode_always">Siempre</string>
+    <string name="apps_mode_schedule">Horario</string>
+    <string name="apps_mode_free_desc">Sin bloqueo por defecto. Los límites y la pausa de abajo siguen aplicando.</string>
+    <string name="apps_mode_always_desc">No podrás entrar mientras la regla esté activa.</string>
+    <string name="apps_mode_schedule_desc">Elige cuándo está bloqueada, o cuándo es el único momento en que puedes usarla.</string>
+    <string name="apps_sched_block">Bloquear en…</string>
+    <string name="apps_sched_allow">Solo permitir en…</string>
+    <string name="apps_add_window">Añadir otro horario</string>
+    <string name="apps_workday_preset">Usar horario laboral (Lun–Vie, 9–14 y 16–21)</string>
+    <string name="apps_from">Desde %1$s</string>
+    <string name="apps_until">Hasta %1$s</string>
+    <string name="apps_remove_window">Quitar este horario</string>
+    <string name="apps_ends_next_day">Termina al día siguiente.</string>
+</resources>
